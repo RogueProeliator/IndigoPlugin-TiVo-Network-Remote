@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<MenuItems>
+	<MenuItem id="sendNonDocumentedCommand">
+		<Name>Send Arbitrary Command</Name>
+		<CallbackMethod>sendArbitraryCommand</CallbackMethod>
+		<ButtonTitle>Send</ButtonTitle>
+		<ConfigUI>
+			<Field id="sendArbitraryCommandTitle" type="label" fontColor="darkGray">
+				<Label>SEND ARBITRARY COMMAND</Label>
+			</Field>
+			<Field id="titleSeparator" type="separator" />
+			<Field type="label" id="commandSendInstructions" fontSize="small">
+				<Label>This allows sending an arbitrary command to the TiVo box for use in debugging control codes. The code will be sent just as if from the other actions, but with any value typed here.</Label>
+			</Field>
+			<Field id="targetDevice" type="menu">
+				<Label>TiVo:</Label>
+				<List class="indigo.devices" filter="self.tivoRemoteDevice" /> 
+			</Field>
+			<Field type="textfield" id="commandToSend">
+				<Label>Command:</Label>
+			</Field>
+			<Field id="exampleCommandFormat" type="label" fontSize="small" alignWithControl="true">
+				<Label>Example Command: IRCODE DOWN</Label>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+	<MenuItem id="deviceCmdsSeparator" type="separator" />
+	[DEBUGOPTIONS]
+</MenuItems>

@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<Devices>
+
+	<!-- simple, one-way TiVo network remote; no states necessary other than a -->
+	<!-- connection status -->
+	<Device type="custom" id="tivoRemoteDevice">
+		<Name>TiVo Network Remote Control</Name>
+		<ConfigUI>	
+			<Field id="commOptionsTitle" type="label" fontColor="darkGray">
+				<Label>NETWORK OPTIONS</Label>
+			</Field>
+			<Field id="instructionSeparator2" type="separator" />
+			<Field id="tivoSelectionInstructions" type="label" fontSize="small">
+				<Label>Please select or manually enter the IP address of the TiVo to control. Note that it is best to have the TiVo on a static IP address to avoid the plugin losing connection should the DHCP server provide a new IP after configuration.</Label>
+			</Field>
+			<Field id="tivoEnumeratedIPAddresses" type="menu">
+				<Label>TiVo Devices Found:</Label>
+				<List class="self" filter="" method="findTiVoDevices" />
+			</Field>
+			<Field id="selectEnumeratedDevice" type="button" enabledBindingId="tivoEnumeratedIPAddresses">
+				<Label></Label>
+				<Title>Use Selected TiVo</Title>
+				<CallbackMethod>selectUPNPEnumeratedDeviceForUse</CallbackMethod>
+			</Field>
+			<Field id="tivoIPAddress" type="textfield">
+				<Label>TiVo IP Address:</Label>	
+			</Field>
+			<Field id="address" type="textfield" hidden='true' >
+				<Label/>
+			</Field>
+			<Field type="label" id="miscOptionsSpacer" fontSize="small">
+				<Label></Label>
+			</Field>
+			<Field id="miscOptionsTitle" type="label" fontColor="darkGray">
+				<Label>MISC OPTIONS</Label>
+			</Field>
+			<Field id="miscSeparator2" type="separator" />
+			<Field id="tivoMAK" type="textfield">
+				<Label>Media Access Key (MAK):</Label>
+			</Field>
+			<Field id="makInstructions" type="label" fontSize="small" alignWithControl="true">
+				<Label>The Media Access Key (MAK) is required to enable certain advanced features of the TiVo Network Remote, such as direct navigation to certain screens (such as Amazon, Netflix, etc.) For basic control this is not required. Please see the forum if you need help in obtaining your MAK.</Label>
+			</Field>
+		</ConfigUI>
+		<UiDisplayStateId>connectionState</UiDisplayStateId>
+		<States>
+			<State id="isConnected">
+				<ValueType>Boolean</ValueType>
+				<TriggerLabel>Is Connected</TriggerLabel>
+				<ControlPageLabel>Is Connected</ControlPageLabel>
+			</State>
+			<State id="connectionState">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Connection State Changed</TriggerLabel>
+				<ControlPageLabel>Connection Status</ControlPageLabel>
+			</State>		
+			<State id="currentChannel">
+				<ValueType>Number</ValueType>
+				<TriggerLabel>LiveTV Channel</TriggerLabel>
+				<ControlPageLabel>LiveTV Channel</ControlPageLabel>
+			</State>
+			<State id="channelSelector">
+				<ValueType>String</ValueType>
+				<TriggerLabel>Channel Selector</TriggerLabel>
+				<ControlPageLabel>Channel Selector</ControlPageLabel>
+			</State>
+		</States>
+	</Device>
+	
+</Devices>

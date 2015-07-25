@@ -1,0 +1,166 @@
+<?xml version="1.0"?>
+<Actions>
+
+	<Action id="irCommandToTivo" deviceFilter="self">
+		<Name>Send network-based IR command to TiVo</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+		<ConfigUI>
+			<Field type="menu" id="irCommandSelect">
+				<Label>IR Command:</Label>
+				<List>
+					<Option value="NUM0">0</Option>
+					<Option value="NUM1">1</Option>
+					<Option value="NUM2">2</Option>
+					<Option value="NUM3">3</Option>
+					<Option value="NUM4">4</Option>
+					<Option value="NUM5">5</Option>
+					<Option value="NUM6">6</Option>
+					<Option value="NUM7">7</Option>
+					<Option value="NUM8">8</Option>
+					<Option value="NUM9">9</Option>
+					<Option value="ADVANCE">Advance</Option>
+					<Option value="ASPECT_CORRECTION_FULL">Aspect Correction: Full</Option>
+					<Option value="ASPECT_CORRECTION_PANEL">Aspect Correction: Panel</Option>
+					<Option value="ASPECT_CORRECTION_ZOOM">Aspect Correction: Zoom</Option>
+					<Option value="ASPECT_CORRECTION_WIDE_ZOOM">Aspect Correction: Wide Zoom</Option>
+					<Option value="CHANNELDOWN">Channel Down</Option>
+					<Option value="CHANNELUP">Channel Up</Option>
+					<Option value="CLEAR">Clear</Option>
+					<Option value="CC_ON">Closed Captioning On</Option>
+					<Option value="CC_OFF">Closed Captioning Off</Option>
+					<Option value="DOWN">Down</Option>
+					<Option value="ENTER">Enter</Option>
+					<Option value="FORWARD">Forward</Option>
+					<Option value="GUIDE">Guide</Option>
+					<Option value="INFO">Info</Option>
+					<Option value="LEFT">Left</Option>
+					<Option value="LIVETV">Live TV</Option>
+					<Option value="OPTIONS">Options</Option>
+					<Option value="PAUSE">Pause</Option>
+					<Option value="PLAY">Play</Option>
+					<Option value="RECORD">Record</Option>
+					<Option value="REPLAY">Replay</Option>
+					<Option value="REVERSE">Reverse</Option>
+					<Option value="RIGHT">Right</Option>
+					<Option value="SELECT">Select</Option>
+					<Option value="SLOW">Slow</Option>
+					<Option value="STANDBY">Standby</Option>
+					<Option value="THUMBSDOWN">Thumbs Down</Option>
+					<Option value="THUMBSUP">Thumbs Up</Option>
+					<Option value="TIVO">TiVo</Option>
+					<Option value="UP">Up</Option>
+					<Option value="VIDEO_MODE_FIXED_480i">Video Mode: 480i</Option>
+					<Option value="VIDEO_MODE_FIXED_480p">Video Mode: 480p</Option>
+					<Option value="VIDEO_MODE_FIXED_720p">Video Mode: 720p</Option>
+					<Option value="VIDEO_MODE_FIXED_1080i">Video Mode: 1080i</Option>
+					<Option value="VIDEO_MODE_HYBRID">Video Mode: Hybrid</Option>
+					<Option value="VIDEO_MODE_HYBRID_720p">Video Mode: Hybrid 720p</Option>
+					<Option value="VIDEO_MODE_HYBRID_1080i">Video Mode: Hybrid 1080i</Option>
+					<Option value="A">A</Option>
+					<Option value="B">B</Option>
+					<Option value="C">C</Option>
+					<Option value="D">D</Option>
+					<Option value="E">E</Option>
+					<Option value="F">F</Option>
+					<Option value="G">G</Option>
+					<Option value="H">H</Option>
+					<Option value="I">I</Option>
+					<Option value="J">J</Option>
+					<Option value="K">K</Option>
+					<Option value="L">L</Option>
+					<Option value="M">M</Option>
+					<Option value="N">N</Option>
+					<Option value="O">O</Option>
+					<Option value="P">P</Option>
+					<Option value="Q">Q</Option>
+					<Option value="R">R</Option>
+					<Option value="S">S</Option>
+					<Option value="T">T</Option>
+					<Option value="U">U</Option>
+					<Option value="V">V</Option>
+					<Option value="W">W</Option>
+					<Option value="X">X</Option>
+					<Option value="Y">Y</Option>
+					<Option value="Z">Z</Option>
+					<Option value="SPACE">[SPACE]</Option>
+					<Option value="PERIOD">.</Option>
+					<Option value="MINUS">-</Option>
+					<Option value="EQUALS">=</Option>
+					<Option value="COMMA">,</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="teleportCommandToTivo" deviceFilter="self">
+		<Name>Send network-based teleport command to TiVo</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+		<ConfigUI>
+			<Field type="menu" id="teleportCommandSelect">
+				<Label>Destination:</Label>
+				<List>
+					<Option value="GUIDE">Guide</Option>
+					<Option value="LIVETV">Live TV</Option>
+					<Option value="NOWPLAYING">Now Playing</Option>
+					<Option value="TIVO">TiVo Screen</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="tuneCommandToTiVo" deviceFilter="self">
+		<Name>Change channel on TiVo</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+		<ConfigUI>
+			<Field type="textfield" id="channelToTune">
+				<Label>Tune to channel:</Label>
+			</Field>
+			<Field type="checkbox" id="forceTune" defaultValue="False">
+				<Label>Force Tune:</Label>
+				<Description>(Cancels recording if necessary)</Description>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="sep01" />
+	<Action id="addDigitToChannelSelector" deviceFilter="self">
+		<Name>Add a digit to the channel selector</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+		<ConfigUI>
+			<Field type="label" id="instructions" fontSize="small">
+				<Label>Adds a digit to the channel selector to aid in creating control page keypads with which you can change the channel.</Label>
+			</Field>
+			<Field type="menu" id="digitToAdd">
+				<Label>Digit:</Label>
+				<List>
+					<Option value="0">0</Option>
+					<Option value="1">1</Option>
+					<Option value="2">2</Option>
+					<Option value="3">3</Option>
+					<Option value="4">4</Option>
+					<Option value="5">5</Option>
+					<Option value="6">6</Option>
+					<Option value="7">7</Option>
+					<Option value="8">8</Option>
+					<Option value="9">9</Option>
+					<Option value=".">.</Option>
+				</List>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="tuneToChannelSelectorChannel" deviceFilter="self">
+		<Name>Tune to the channel selector's channel</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+		<ConfigUI>
+			<Field type="checkbox" id="forceTune" defaultValue="False">
+				<Label>Force Tune:</Label>
+				<Description>Cancels recording if necessary</Description>
+			</Field>
+		</ConfigUI>
+	</Action>
+	<Action id="removeDigitFromChannelSelector" deviceFilter="self">
+		<Name>Remove the last digit from channel selector</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+	<Action id="clearChannelSelector" deviceFilter="self">
+		<Name>Clear the channel selector</Name>
+		<CallbackMethod>executeAction</CallbackMethod>
+	</Action>
+</Actions>

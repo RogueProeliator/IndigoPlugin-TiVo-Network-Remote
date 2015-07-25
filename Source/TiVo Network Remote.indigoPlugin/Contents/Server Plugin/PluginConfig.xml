@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<PluginConfig>
+	<Field id="commOptionsTitle" type="label" fontColor="darkGray">
+		<Label>UPDATE NOTIFICATION OPTIONS</Label>
+	</Field>
+	<Field id="updateSectionSeparator2" type="separator" />
+	<Field type="label" id="updaterInstructions" fontSize="small">
+		<Label>This plugin may optionally email you to notify when updates are available; to do so, you must enable the notifications email, enter an email address and ensure that email sending is configured in Indigo's preferences.</Label>
+	</Field>
+	<Field id="updaterEmailsEnabled" type="checkbox" defaultValue="true">
+	   <Label>Email Update Notifications:</Label>
+	</Field>
+	<Field id="updaterEmail" type="textfield">
+	   <Label>Notifications Email:</Label>
+	</Field>
+	<Field type="label" id="debugSpacer" fontSize="small">
+		<Label></Label>
+	</Field>
+	<Field id="debugOptionsTitle" type="label" fontColor="darkGray">
+		<Label>DEBUGGING OPTIONS</Label>
+	</Field>
+	<Field id="debugSeparator2" type="separator" />
+	<Field type="label" id="debugInstructions" fontSize="small">
+		<Label>Enabling debugging will write lots of status and state information to the Indigo event log. This should normally be left disabled unless you are troubleshooting a problem.</Label>
+	</Field>
+	<Field type="checkbox" id="showDebugInfo">
+		<Label>Enable debuging:</Label>
+		<Description>(not recommended)</Description>
+	</Field>
+	<Field type="menu" id="debugLevel" defaultValue="0">
+		<Label>Debug Level:</Label>
+		<List>
+			<Option value="0">Low</Option>
+			<Option value="1">Medium</Option>
+			<Option value="2">High</Option>
+		</List>
+	</Field>
+</PluginConfig>

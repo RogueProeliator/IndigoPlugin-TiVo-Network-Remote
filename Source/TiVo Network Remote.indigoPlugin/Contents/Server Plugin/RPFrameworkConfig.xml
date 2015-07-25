@@ -1,0 +1,150 @@
+<RPFrameworkConfig>
+	<pluginConfig>
+		<guiConfiguration>
+			<pluginUpdateURL><![CDATA[http://forums.indigodomo.com/viewtopic.php?f=60&t=10559]]></pluginUpdateURL>
+		</guiConfiguration>
+		<deviceMapping>
+			<device indigoId="tivoRemoteDevice" className="TivoRemoteDevice" />
+		</deviceMapping>
+		<devices>
+			<device indigoId="tivoRemoteDevice">
+				<params>
+					<param indigoId="tivoIPAddress" paramType="ParamTypeIPAddress" isRequired="True">
+						<invalidValueMessage><![CDATA[Please enter the IP address of the TiVo to control]]></invalidValueMessage>
+					</param>
+					<param indigoId="tivoMAK" paramType="ParamTypeString" isRequired="False">
+						<validationExpression><![CDATA[^\d{10}$]]></validationExpression>
+						<invalidValueMessage><![CDATA[Please enter a valid 10-digit TiVo Media Access Key]]></invalidValueMessage>
+					</param>
+				</params>
+				<guiConfiguration>
+					<deviceUPNPDeviceFieldId>tivoEnumeratedIPAddresses</deviceUPNPDeviceFieldId>
+					<deviceUPNPDeviceSelectedFieldId>tivoIPAddress</deviceUPNPDeviceSelectedFieldId>
+					<deviceAddressFormat><![CDATA[%ap:tivoIPAddress%]]></deviceAddressFormat>
+					<telnetConnectionDeviceStateName>connectionState</telnetConnectionDeviceStateName>
+					<telnetConnectionDeviceStateBoolean>isConnected</telnetConnectionDeviceStateBoolean>
+					<reconnectAttemptLimit>10</reconnectAttemptLimit>
+				</guiConfiguration>
+				<deviceResponses>
+					<response id="currentChannelReported" respondToActionId="">
+						<criteriaFormatString><![CDATA[%cp:response%]]></criteriaFormatString>
+						<matchExpression><![CDATA[^CH_STATUS (\d+)(\s\d+){0,1}(\s\w+){0,1}$]]></matchExpression>
+						<effects>
+							<effect effectType="RESPONSE_EFFECT_UPDATESTATE" evalResult="true">
+								<updateParam>currentChannel</updateParam>
+								<updateValueFormat><![CDATA[re.match("^CH_STATUS (\d+)(\s\d+){0,1}(\s\w+){0,1}$", "%cp:response%", re.I).group(1)]]></updateValueFormat>
+							</effect>
+						</effects>
+					</response>
+				</deviceResponses>
+			</device>
+		</devices>
+		<actions>
+			<action indigoId="irCommandToTivo">
+				<commands>
+					<command>
+						<commandName>writeToTelnetConn</commandName>
+						<commandFormat><![CDATA[IRCODE %ap:irCommandSelect%]]></commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="irCommandSelect" paramType="ParamTypeString" isRequired="true">
+						<invalidValueMessage><![CDATA[Please select the remote key to send]]></invalidValueMessage>
+					</param>
+				</params>
+			</action>
+			<action indigoId="teleportCommandToTivo">
+				<commands>
+					<command>
+						<commandName>writeToTelnetConn</commandName>
+						<commandFormat><![CDATA[TELEPORT %ap:teleportCommandSelect%]]></commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="teleportCommandSelect" paramType="ParamTypeString" isRequired="true">
+						<invalidValueMessage><![CDATA[Please select the screen to which you wish to teleport]]></invalidValueMessage>
+					</param>
+				</params>
+			</action>
+			<action indigoId="tuneCommandToTiVo">
+				<commands>
+					<command>
+						<commandName>writeToTelnetConn</commandName>
+						<commandFormat><![CDATA[eval:"FORCECH %ap:channelToTune%" if %ap:forceTune% else "SETCH %ap:channelToTune%"]]></commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="channelToTune" paramType="ParamTypeFloat" isRequired="True">
+						<minValue>1</minValue>
+						<maxValue>9999</maxValue>
+						<invalidValueMessage><![CDATA[Please enter a channel number]]></invalidValueMessage>
+					</param>
+					<param indigoId="forceTune" paramType="ParamTypeBoolean" isRequired="True">
+						<defaultValue>False</defaultValue>
+					</param>
+				</params>
+			</action>
+			<action indigoId="addDigitToChannelSelector">
+				<commands>
+					<command>
+						<commandName>UPDATEDEVICESTATE</commandName>
+						<commandFormat><![CDATA[{ds:channelSelector}{eval:"%ds:channelSelector%" + "%ap:digitToAdd%"}]]></commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="digitToAdd" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please select the digit to add to the channel selector]]></invalidValueMessage>
+					</param>
+				</params>
+			</action>
+			<action indigoId="removeDigitFromChannelSelector">
+				<commands>
+					<command>
+						<commandName>UPDATEDEVICESTATE</commandName>
+						<commandFormat><![CDATA[{ds:channelSelector}{eval:"%ds:channelSelector%"[:-1]}]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="clearChannelSelector">
+				<commands>
+					<command>
+						<commandName>UPDATEDEVICESTATE</commandName>
+						<commandFormat><![CDATA[{ds:channelSelector}{eval:""}]]></commandFormat>
+					</command>
+				</commands>
+			</action>
+			<action indigoId="tuneToChannelSelectorChannel">
+				<commands>
+					<command>
+						<commandName>writeToTelnetConn</commandName>
+						<commandFormat><![CDATA[eval:"FORCECH %ds:channelSelector%" if %ap:forceTune% else "SETCH %ds:channelSelector%"]]></commandFormat>
+					</command>
+					<command>
+						<commandName>UPDATEDEVICESTATE</commandName>
+						<commandFormat><![CDATA[{ds:channelSelector}{eval:""}]]></commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="forceTune" paramType="ParamTypeBoolean" isRequired="True">
+						<defaultValue>False</defaultValue>
+					</param>
+				</params>
+			</action>
+			
+			<!-- ARBITRARY COMMAND PROCESSING -->
+			<action indigoId="sendArbitraryCommand">
+				<commands>
+					<command>
+						<commandName>writeToTelnetConn</commandName>
+						<commandFormat>%ap:commandCode%</commandFormat>
+					</command>
+				</commands>
+				<params>
+					<param indigoId="commandCode" paramType="ParamTypeString" isRequired="True">
+						<invalidValueMessage><![CDATA[Please enter a command to send]]></invalidValueMessage>
+					</param>
+				</params>
+			</action>
+		</actions>
+	</pluginConfig>
+</RPFrameworkConfig>
