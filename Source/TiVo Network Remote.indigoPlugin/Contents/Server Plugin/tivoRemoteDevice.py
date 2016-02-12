@@ -53,6 +53,6 @@ class TivoRemoteDevice(RPFramework.RPFrameworkTelnetDevice.RPFrameworkTelnetDevi
 	# format of (ipAddress/HostName, portNumber)
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def getDeviceAddressInfo(self):
-		return (self.indigoDevice.pluginProps.get("tivoIPAddress", ""), int(self.indigoDevice.pluginProps.get("portNumber", "31339")))
+		return (self.indigoDevice.pluginProps.get(u'tivoIPAddress', u''), int(self.indigoDevice.pluginProps.get(u'portNumber', u'31339')))
 		
 		

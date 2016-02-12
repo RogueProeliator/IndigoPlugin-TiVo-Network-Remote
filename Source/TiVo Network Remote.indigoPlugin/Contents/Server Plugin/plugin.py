@@ -75,7 +75,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs):
 		# RP framework base class's init method
-		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, "http://www.duncanware.com/Downloads/IndigoHomeAutomation/Plugins/TiVoNetworkRemote/TiVoNetworkRemoteVersionInfo.html", managedDeviceClassModule=tivoRemoteDevice)
+		super(Plugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs, u'http://www.duncanware.com/Downloads/IndigoHomeAutomation/Plugins/TiVoNetworkRemote/TiVoNetworkRemoteVersionInfo.html', managedDeviceClassModule=tivoRemoteDevice)
 	
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -89,11 +89,11 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	def validateDeviceConfigUiEx(self, valuesDict, deviceTypeId, devId):	
 		# check to see if there are already devices created for this plugin using the same
 		# IP address
-		for dev in indigo.devices.iter("self"):
+		for dev in indigo.devices.iter(u'self'):
 			if devId != dev.id:
-				if dev.pluginProps.get("tivoIPAddress") == valuesDict["tivoIPAddress"]:
+				if dev.pluginProps.get(u'tivoIPAddress') == valuesDict[u'tivoIPAddress']:
 					errorMsgDict = indigo.Dict()
-					errorMsgDict["tivoIPAddress"] = "Device '" + dev.name + "' already set to use this IP Address. You cannot have two Indigo devices attached to the same TiVo device."
+					errorMsgDict[u'tivoIPAddress'] = u'Device "' + dev.name + u'" already set to use this IP Address. You cannot have two Indigo devices attached to the same TiVo device.'
 					return (False, valuesDict, errorMsgDict)
 		
 		# user input is all valid
@@ -109,23 +109,23 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-	
 	def sendArbitraryCommand(self, valuesDict, typeId):
 		try:
-			deviceId = valuesDict.get("targetDevice", "0")
-			commandCode = valuesDict.get("commandToSend", "").strip()
+			deviceId = valuesDict.get(u'targetDevice', u'0')
+			commandCode = valuesDict.get(u'commandToSend', u'').strip()
 		
-			if deviceId == "" or deviceId == "0":
+			if deviceId == u'' or deviceId == u'0':
 				# no device was selected
 				errorDict = indigo.Dict()
-				errorDict["targetDevice"] = "Please select a device"
+				errorDict[u'targetDevice'] = u'Please select a device'
 				return (False, valuesDict, errorDict)
-			elif commandCode == "":
+			elif commandCode == u'':
 				errorDict = indigo.Dict()
-				errorDict["commandToSend"] = "Enter command to send"
+				errorDict[u'commandToSend'] = u'Enter command to send'
 				return (False, valuesDict, errorDict)
 			else:
 				# send the code using the normal action processing...
 				actionParams = indigo.Dict()
-				actionParams["commandCode"] = commandCode
-				self.executeAction(pluginAction=None, indigoActionId="sendArbitraryCommand", indigoDeviceId=int(deviceId), paramValues=actionParams)
+				actionParams[u'commandCode'] = commandCode
+				self.executeAction(pluginAction=None, indigoActionId=u'sendArbitraryCommand', indigoDeviceId=int(deviceId), paramValues=actionParams)
 				return (True, valuesDict)
 		except:
 			self.exceptionLog()
@@ -189,7 +189,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 		tivos = []
 		for tcd, address in tcds.items():
 			name, version = self.getTiVoNameAndVersion(address)
-			tivos.append((address, name + " (v" + str(version) + ")"))
+			tivos.append((address, RPFramework.RPFrameworkUtils.to_unicode(name) + u' (v' + RPFramework.RPFrameworkUtils.to_unicode(version) + u')'))
 		return tivos
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -213,7 +213,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 
 			tsock.close()
 
-			self.logDebugMessage("Received beacon: " + tivo_beacon, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+			self.logDebugMessage(u'Received beacon: ' + tivo_beacon, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
 			name = machine_name(tivo_beacon)[0]
 			version = float(swversion(tivo_beacon)[0])
 		except:
