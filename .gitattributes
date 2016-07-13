@@ -1,0 +1,4 @@
+.gitattributes export-ignore
+Documentation/ export-ignore
+README.md export-ignore
+VERSION_HISTORY.txt export-ignore

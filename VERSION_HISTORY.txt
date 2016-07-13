@@ -1,0 +1,47 @@
+TiVo Network Remote Plugin
+https://github.com/RogueProeliator/IndigoPlugin-TiVo-Network-Remote
+
+To update to the latest version of the application, please download the latest release available at https://github.com/RogueProeliator/IndigoPlugin-TiVo-Network-Remote/releases or via the Check For Updates menu option if you already have a version installed.
+
+=================================
+VERSION HISTORY
+=================================
+Version 1.3.19 [February 2016]:
+* Adds support for non-US characters throughout the plugin
+* Adds additional debug and friendlier error messages
+* Better sets an error state in the device list when a connection fails
+* Fixes issue loading the plugin if it is renamed prior to installation into Indigo
+
+Version 1.3.14 [March 2015]:
+* Added new event that will fire whenever the plugin is updated
+* Added a graphical window for checking for updates (found via the Plugin's menu)
+* Added ability to send an arbitrary command to the TiVo; this may be used for debugging or testing
+
+Version 1.3.12 [October 2014]:
+* Improved plugin response time when multiple commands are sent in a short amount of time
+
+Version 1.2.9 [July 2014]:
+* Improved auto-discovery of the TiVo name and software version
+* Implemented auto-reconnect for disconnected/failed connections
+
+Version 1.1.6 [January 2014]:
+* Improved error handling when an error or unexpected reply is received from TiVo
+* Added Standby IR code (available in the "Send network-based IR command to TiVo" action
+
+Version 1.1.4 [December 2013]:
+* Minor update that improves menu and dialog instructions and formatting
+
+Version 1.1.3 [November 2013]:
+* Created better state detection for disconnected devices and error states
+* Better recognition of new TiVo devices when adding a new device
+
+Version 1.1:
+* Added a device state that tracks the current Live TV channel
+* Added channel selector state and actions to ease creation of channel entry keypads on control pages
+* Changed address storage to IP address for reliability reasons (discovery is still enabled in device config)
+* Migrated backend to a new framework which should be slightly faster
+* Changed debug option (in Plugin Config) to allow setting of the level of debug messages desired
+* Moved the sample control pages images to their own download (see forum for more info)
+
+Version 1.0:
+This is the initial release of the plugin. Although every effort has been made to ensure that the plugin is working as advertised, there may be bugs or ommissions. Please check the Indigo Forums for help related to installing, updating or using this plugin.

@@ -45,3 +45,9 @@ This command will tune the TiVo to the requested channel; the DVR must be in Liv
 
 ###Channel Selector Actions
 The "channel selector" methods are present as a convenience for you when creating control pages. The channel selector acts as a placeholder for the user entering a channel via a number-pad style interface. Digits may be added (or removed) by buttons on the number page until the user presses a "Go" button at which time you should execute the Tune to Channel Selector action; this will also clear the selector to allow for new input.
+
+#Available Device States
+The majority of the TiVo API is for control, but a couple of states are exposed via the plugin:
+- **isConnected** & **connectionState** - tracks if Indigo has been able to successfully create/maintain a connection to the TiVo
+- **currentChannel** - tracks the current channel in the LiveTV view
+- **channelSelector** - stores the current channel selector (see actions above for usage)
