@@ -27,11 +27,11 @@ The latest released version of the plugin is available for download [here](http:
 
 ###Configuring the Plugin
 Upon first installation you will be asked to configure the plugin; please see the instructions on the configuration screen for more information. Most users will be fine with the defaults unless an email is desired when a new version is released.
-![](<Image Resources/PluginConfigurationScreen.png>)
+![](<Documentation/Doc-Images/PluginConfigurationScreen.png>)
 
 #Plugin Devices
 Each TiVo that you wish to control should be created as an Indigo Device; In the Device Settings you will need to select from the list of TiVo devices found on the network or else manually enter your TiVo's IP address. Note that if you ever lose connection with your TiVo device, you may need to return here to find/enter the IP Address again if it has picked up a new address on the network. You can avoid this by setting up a static IP address for your TiVo.
-![](<Image Resources/EditDeviceSettings.png>)
+![](<Documentation/Doc-Images/EditDeviceSettings.png>)
 
 #Available Actions
 ###IR Command
