@@ -156,7 +156,7 @@ class RPFrameworkIndigoActionDfn(object):
 				executeTimesStr = eval(executeTimesStr.replace(u'eval:', u''))
 			if executeTimesStr == None or executeTimesStr == u'':
 				executeTimesStr = u'1'
-			executeTimes = float(executeTimesStr)
+			executeTimes = int(executeTimesStr)
 		
 			# create a new command for each of the count requested...
 			for i in range(0,executeTimes):
