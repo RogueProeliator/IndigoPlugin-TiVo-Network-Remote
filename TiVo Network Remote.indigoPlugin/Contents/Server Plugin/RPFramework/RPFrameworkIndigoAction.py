@@ -128,8 +128,8 @@ class RPFrameworkIndigoActionDfn(object):
 		# validate that the values sent in are valid for this action
 		validationResults = self.validateActionValues(paramValues)
 		if validationResults[0] == False:
-			indigo.server.log(u'Invalid values sent for action ' + RPFrameworkUtils.to_unicode(self.indigoActionId) + u'; the following errors were found:')
-			indigo.server.log(RPFrameworkUtils.to_unicode(validationResults[2]))
+			rpPlugin.logger.error(u'Invalid values sent for action ' + RPFrameworkUtils.to_unicode(self.indigoActionId) + u'; the following errors were found:')
+			rpPlugin.logger.error(RPFrameworkUtils.to_unicode(validationResults[2]))
 			return
 		
 		# determine the list of parameter values based upon the parameter definitions
@@ -146,7 +146,7 @@ class RPFrameworkIndigoActionDfn(object):
 			if executeCondition != None and executeCondition != u'':
 				# this should eval to a boolean value
 				if eval(rpPlugin.substituteIndigoValues(executeCondition, rpDevice, resolvedValues)) == False:
-					rpPlugin.logDebugMessage(u'Execute condition failed, skipping execution for command: ' + commandName, RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+					rpPlugin.logger.threaddebug(u'Execute condition failed, skipping execution for command: ' + commandName)
 					continue
 		
 			# determine the number of times to execute this command (supports sending the same request

@@ -329,23 +329,20 @@ class GitHubPluginUpdater(object):
 	#---------------------------------------------------------------------------
 	# convenience method for log messages
 	def _log(self, msg):
-		# FIXME - this is a nasty hack, can't we pass the log call to a plugin method like debug and error?
-		try:
-			indigo.server.log(msg)
-		except:
-			print msg
+		if self.plugin:
+			self.plugin.logger.info(msg)
 
 	#---------------------------------------------------------------------------
 	# convenience method for debug messages
 	def _debug(self, msg):
 		if self.plugin:
-			self.plugin.debugLog(msg)
+			self.plugin.logger.debug(msg)
 
 	#---------------------------------------------------------------------------
 	# convenience method for error messages
 	def _error(self, msg):
 		if self.plugin:
-			self.plugin.errorLog(msg)
+			self.plugin.logger.error(msg)
 
 ################################################################################
 # maps the standard version string as a tuple for comparrison

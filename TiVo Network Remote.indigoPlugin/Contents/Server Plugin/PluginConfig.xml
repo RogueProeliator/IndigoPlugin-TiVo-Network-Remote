@@ -23,15 +23,11 @@
 	<Field type="label" id="debugInstructions" fontSize="small">
 		<Label>Enabling debugging will write lots of status and state information to the Indigo event log. This should normally be left disabled unless you are troubleshooting a problem.</Label>
 	</Field>
-	<Field type="checkbox" id="showDebugInfo">
-		<Label>Enable debuging:</Label>
-		<Description>(not recommended)</Description>
-	</Field>
 	<Field type="menu" id="debugLevel" defaultValue="0">
 		<Label>Debug Level:</Label>
 		<List>
-			<Option value="0">Low</Option>
-			<Option value="1">Medium</Option>
+			<Option value="0">Off</Option>
+			<Option value="1">Low</Option>
 			<Option value="2">High</Option>
 		</List>
 	</Field>

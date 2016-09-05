@@ -136,7 +136,7 @@ class RPFrameworkDeviceResponse(object):
 			if effect.updateExecCondition != None and effect.updateExecCondition != u'':
 				# this should eval to a boolean value
 				if eval(rpPlugin.substituteIndigoValues(effect.updateExecCondition, rpDevice, dict())) == False:
-					rpPlugin.logDebugMessage(u'Execute condition failed for response, skipping execution for effect: ' + effect.effectType, RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+					rpPlugin.logger.threaddebug(u'Execute condition failed for response, skipping execution for effect: ' + effect.effectType)
 					continue
 		
 			# processing for this effect is dependent upon the type
@@ -161,10 +161,10 @@ class RPFrameworkDeviceResponse(object):
 				
 					# update the state...
 					if newStateUIValue == u'':
-						rpPlugin.logDebugMessage(u'Effect execution: Update state "' + effect.updateParam + u'" to "' + RPFrameworkUtils.to_unicode(newStateValue) + u'"', RPFrameworkPlugin.DEBUGLEVEL_MED)
+						rpPlugin.logger.debug(u'Effect execution: Update state "' + effect.updateParam + u'" to "' + RPFrameworkUtils.to_unicode(newStateValue) + u'"')
 						rpDevice.indigoDevice.updateStateOnServer(key=effect.updateParam, value=newStateValue)
 					else:
-						rpPlugin.logDebugMessage(u'Effect execution: Update state "' + effect.updateParam + '" to "' + RPFrameworkUtils.to_unicode(newStateValue) + u'" with UIValue "' + RPFrameworkUtils.to_unicode(newStateUIValue) + u'"', RPFrameworkPlugin.DEBUGLEVEL_MED)
+						rpPlugin.logger.debug(u'Effect execution: Update state "' + effect.updateParam + '" to "' + RPFrameworkUtils.to_unicode(newStateValue) + u'" with UIValue "' + RPFrameworkUtils.to_unicode(newStateUIValue) + u'"')
 						rpDevice.indigoDevice.updateStateOnServer(key=effect.updateParam, value=newStateValue, uiValue=newStateUIValue)
 				
 				elif effect.effectType == RESPONSE_EFFECT_QUEUECOMMAND:
@@ -178,15 +178,15 @@ class RPFrameworkDeviceResponse(object):
 					else:
 						queueCommandPayload = queueCommandPayloadStr
 				
-					rpPlugin.logDebugMessage(u'Effect execution: Queuing command {' + queueCommandName + u'}', RPFrameworkPlugin.DEBUGLEVEL_MED)
+					rpPlugin.logger.debug(u'Effect execution: Queuing command {' + queueCommandName + u'}')
 					rpDevice.queueDeviceCommand(RPFrameworkCommand.RPFrameworkCommand(queueCommandName, queueCommandPayload))
 				
 				elif effect.effectType == RESPONSE_EFFECT_CALLBACK:
 					# this should kick off a callback to a python call on the device...
-					rpPlugin.logDebugMessage(u'Effect execution: Calling function ' + effect.updateParam, RPFrameworkPlugin.DEBUGLEVEL_MED)
+					rpPlugin.logger.debug(u'Effect execution: Calling function ' + effect.updateParam)
 					eval(u'rpDevice.' + effect.updateParam + u'(responseObj, rpCommand)')
 			except:
-				rpPlugin.logErrorMessage(u'Error executing effect for device id ' + RPFrameworkUtils.to_unicode(rpDevice.indigoDevice.id))
+				rpPlugin.logger.error(u'Error executing effect for device id ' + RPFrameworkUtils.to_unicode(rpDevice.indigoDevice.id))
 				
 	
 #/////////////////////////////////////////////////////////////////////////////////////////

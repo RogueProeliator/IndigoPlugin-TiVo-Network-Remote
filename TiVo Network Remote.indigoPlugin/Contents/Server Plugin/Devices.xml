@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <Devices>
-
 	<!-- simple, one-way TiVo network remote; no states necessary other than a -->
 	<!-- connection status -->
 	<Device type="custom" id="tivoRemoteDevice">
@@ -66,5 +65,4 @@
 			</State>
 		</States>
 	</Device>
-	
 </Devices>

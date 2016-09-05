@@ -213,7 +213,7 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 
 			tsock.close()
 
-			self.logDebugMessage(u'Received beacon: ' + tivo_beacon, RPFramework.RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+			self.logger.threaddebug(u'Received beacon: ' + tivo_beacon)
 			name = machine_name(tivo_beacon)[0]
 			version = float(swversion(tivo_beacon)[0])
 		except:

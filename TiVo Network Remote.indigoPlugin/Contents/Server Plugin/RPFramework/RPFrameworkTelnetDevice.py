@@ -127,15 +127,15 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 			# for this telnet device
 			isConnectedStateKey = self.hostPlugin.getGUIConfigValue(self.indigoDevice.deviceTypeId, GUI_CONFIG_ISCONNECTEDSTATEKEY, u'')
 			connectionStateKey = self.hostPlugin.getGUIConfigValue(self.indigoDevice.deviceTypeId, GUI_CONFIG_CONNECTIONSTATEKEY, u'')
-			self.hostPlugin.logDebugMessage(u'Read device state config... isConnected: "' + RPFrameworkUtils.to_unicode(isConnectedStateKey) + u'"; connectionState: "' + RPFrameworkUtils.to_unicode(connectionStateKey) + u'"', RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+			self.hostPlugin.logger.threaddebug(u'Read device state config... isConnected: "' + RPFrameworkUtils.to_unicode(isConnectedStateKey) + u'"; connectionState: "' + RPFrameworkUtils.to_unicode(connectionStateKey) + u'"')
 			telnetConnectionInfo = self.getDeviceAddressInfo()
 		
 			# establish the telenet connection to the telnet-based which handles the primary
 			# network remote operations
-			self.hostPlugin.logDebugMessage(u'Establishing connection to ' + RPFrameworkUtils.to_unicode(telnetConnectionInfo[0]), RPFrameworkPlugin.DEBUGLEVEL_MED)
+			self.hostPlugin.logger.debug(u'Establishing connection to ' + RPFrameworkUtils.to_unicode(telnetConnectionInfo[0]))
 			ipConnection = self.establishDeviceConnection(telnetConnectionInfo)
 			self.failedConnectionAttempts = 0
-			self.hostPlugin.logDebugMessage(u'Connection established', RPFrameworkPlugin.DEBUGLEVEL_LOW)
+			self.hostPlugin.logger.debug(u'Connection established')
 			
 			# update the states on the server to show that we have established a connectionStateKey
 			self.indigoDevice.setErrorStateOnServer(None)
@@ -168,7 +168,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 				# process pending commands now...
 				while not commandQueue.empty():
 					lenQueue = commandQueue.qsize()
-					self.hostPlugin.logDebugMessage(u'Command queue has ' + RPFrameworkUtils.to_unicode(lenQueue) + u' command(s) waiting', RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+					self.hostPlugin.logger.threaddebug(u'Command queue has ' + RPFrameworkUtils.to_unicode(lenQueue) + u' command(s) waiting')
 					
 					# the command name will identify what action should be taken... we will handle the known
 					# commands and dispatch out to the device implementation, if necessary, to handle unknown
@@ -177,7 +177,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 					if command.commandName == RPFrameworkCommand.CMD_INITIALIZE_CONNECTION:
 						# specialized command to instanciate the thread/telnet connection
 						# safely ignore this... just used to spin up the thread
-						self.hostPlugin.logDebugMessage(u'Create connection command de-queued', RPFrameworkPlugin.DEBUGLEVEL_MED)
+						self.hostPlugin.logger.threaddebug(u'Create connection command de-queued')
 						
 						# if the device supports polling for status, it may be initiated here now that
 						# the connection has been established; no additional command will come through
@@ -194,28 +194,28 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 						# payload of the command
 						try:
 							pauseTime = float(command.commandPayload)
-							self.hostPlugin.logDebugMessage(u'Initiating sleep of ' + RPFrameworkUtils.to_unicode(pauseTime) + u' seconds from command.', RPFrameworkPlugin.DEBUGLEVEL_MED)
+							self.hostPlugin.logger.threaddebug(u'Initiating sleep of ' + RPFrameworkUtils.to_unicode(pauseTime) + u' seconds from command.')
 							time.sleep(pauseTime)
 						except:
-							indigo.server.log(u'Invalid pause time requested', isError=True)
+							self.hostPlugin.logger.error(u'Invalid pause time requested')
 							
 					elif command.commandName == RPFrameworkCommand.CMD_UPDATE_DEVICE_STATUS_FULL:
 						# this command instructs the plugin to update the full status of the device (all statuses
 						# that may be read from the device should be read)
 						if updateStatusPollerActionId != u'':
-							self.hostPlugin.logDebugMessage(u'Executing full status update request...', RPFrameworkPlugin.DEBUGLEVEL_MED)
+							self.hostPlugin.logger.debug(u'Executing full status update request...')
 							self.hostPlugin.executeAction(None, indigoActionId=updateStatusPollerActionId, indigoDeviceId=self.indigoDevice.id, paramValues=None)
 							if updateStatusPollerInterval > 0:
 								updateStatusPollerNextRun = time.time() + updateStatusPollerInterval
 						else:
-							self.hostPlugin.logDebugMessage(u'Ignoring status update request, no action specified to update device status', RPFrameworkPlugin.DEBUGLEVEL_LOW)
+							self.hostPlugin.logger.threaddebug(u'Ignoring status update request, no action specified to update device status')
 					
 					elif command.commandName == RPFrameworkCommand.CMD_UPDATE_DEVICE_STATE:
 						# this command is to update a device state with the payload (which may be an
 						# eval command)
 						newStateInfo = re.match('^\{ds\:([a-zA-Z\d]+)\}\{(.+)\}$', command.commandPayload, re.I)
 						if newStateInfo is None:
-							indigo.server.log(u'Invalid new device state specified', isError=True)
+							self.hostPlugin.logger.error(u'Invalid new device state specified')
 						else:
 							# the new device state may include an eval statement...
 							updateStateName = newStateInfo.group(1)
@@ -223,15 +223,15 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 							if updateStateValue.startswith(u'eval'):
 								updateStateValue = eval(updateStateValue.replace(u'eval:', u''))
 							
-							self.hostPlugin.logDebugMessage(u'Updating state "' + RPFrameworkUtils.to_unicode(updateStateName) + u'" to: ' + RPFrameworkUtils.to_unicode(updateStateValue), RPFrameworkPlugin.DEBUGLEVEL_MED)
+							self.hostPlugin.logger.debug(u'Updating state "' + RPFrameworkUtils.to_unicode(updateStateName) + u'" to: ' + RPFrameworkUtils.to_unicode(updateStateValue))
 							self.indigoDevice.updateStateOnServer(key=updateStateName, value=updateStateValue)
 					
 					elif command.commandName == CMD_WRITE_TO_DEVICE:
 						# this command initiates a write of data to the device
-						self.hostPlugin.logDebugMessage(u'Sending command: ' + command.commandPayload, RPFrameworkPlugin.DEBUGLEVEL_MED)
+						self.hostPlugin.logger.debug(u'Sending command: ' + command.commandPayload)
 						writeCommand = command.commandPayload + lineEndingToken
 						ipConnection.write(writeCommand.encode(lineEncoding))
-						self.hostPlugin.logDebugMessage(u'Write command completed.', RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+						self.hostPlugin.logger.threaddebug(u'Write command completed.')
 					
 					else:
 						# this is an unknown command; dispatch it to another routine which is
@@ -241,13 +241,13 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 					# determine if any response has been received from the telnet device...
 					responseText = RPFrameworkUtils.to_unicode(self.readLine(ipConnection, lineEndingToken, commandResponseTimeout))
 					if responseText != u'':
-						self.hostPlugin.logDebugMessage("Received: " + responseText, RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+						self.hostPlugin.logger.threaddebug("Received: " + responseText)
 						self.handleDeviceResponse(responseText.replace(lineEndingToken, u''), command)
 						
 					# if the command has a pause defined for after it is completed then we
 					# should execute that pause now
 					if command.postCommandPause > 0.0 and continueProcessingCommands == True:
-						self.hostPlugin.logDebugMessage(u'Post Command Pause: ' + RPFrameworkUtils.to_unicode(command.postCommandPause), RPFrameworkPlugin.DEBUGLEVEL_MED)
+						self.hostPlugin.logger.threaddebug(u'Post Command Pause: ' + RPFrameworkUtils.to_unicode(command.postCommandPause))
 						time.sleep(command.postCommandPause)
 					
 					# complete the dequeuing of the command, allowing the next
@@ -261,7 +261,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 					# command queue has been emptied so it may be un-prompted incoming data
 					responseText = RPFrameworkUtils.to_unicode(self.readIfAvailable(ipConnection, lineEndingToken, commandResponseTimeout))
 					if responseText != u'':
-						self.hostPlugin.logDebugMessage(u'Received w/o Command: ' + responseText, RPFrameworkPlugin.DEBUGLEVEL_HIGH)
+						self.hostPlugin.logger.threaddebug(u'Received w/o Command: ' + responseText)
 						self.handleDeviceResponse(responseText.replace(lineEndingToken, u''), None)
 				
 					# when the queue is empty, pause a bit on each iteration
@@ -284,7 +284,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 		except (socket.timeout, EOFError):
 			# this is a standard timeout/disconnect
 			if self.failedConnectionAttempts == 0 or self.hostPlugin.debug == True:
-				indigo.server.log(u'Connection timed out for device ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id), isError=True)
+				self.hostPlugin.logger.error(u'Connection timed out for device ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id))
 				
 			if connectionStateKey != u'':
 				self.indigoDevice.updateStateOnServer(key=connectionStateKey, value=u'Unavailable')
@@ -299,7 +299,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 			# this is a standard socket error, such as a reset... we can attempt to recover from this with
 			# a scheduled reconnect
 			if self.failedConnectionAttempts == 0 or self.hostPlugin.debug == True:
-				indigo.server.log(u'Connection failed for device ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u': ' + RPFrameworkUtils.to_unicode(e), isError=True)
+				self.hostPlugin.logg.error(u'Connection failed for device ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u': ' + RPFrameworkUtils.to_unicode(e))
 
 			if connectionStateKey != u'':
 				self.indigoDevice.updateStateOnServer(key=connectionStateKey, value=u'Unavailable')
@@ -312,10 +312,11 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 			self.scheduleReconnectionAttempt()
 		except:
 			self.indigoDevice.setErrorStateOnServer(u'Error')
-			self.hostPlugin.logErrorMessage(u'Error during background processing')
+			self.hostPlugin.logger.error(u'Error during background processing')
+			self.hostPlugin.logger.exception()
 		finally:			
 			# update the device's connection state to no longer connected...
-			self.hostPlugin.logDebugMessage(u'Closing connection to device', RPFrameworkPlugin.DEBUGLEVEL_LOW)
+			self.hostPlugin.logger.debug(u'Closing connection to device')
 			if isConnectedStateKey != u'':
 				self.indigoDevice.updateStateOnServer(key=isConnectedStateKey, value=u'false', clearErrorState=False)
 			if connectionStateKey != u'':
@@ -413,7 +414,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 		# and determine if any match
 		for rpResponse in self.hostPlugin.getDeviceResponseDefinitions(self.indigoDevice.deviceTypeId):
 			if rpResponse.isResponseMatch(responseText, rpCommand, self, self.hostPlugin):
-				self.hostPlugin.logDebugMessage(u'Found response match: ' + rpResponse.responseId, RPFrameworkPlugin.DEBUGLEVEL_MED)
+				self.hostPlugin.logger.threaddebug(u'Found response match: ' + rpResponse.responseId)
 				rpResponse.executeEffects(responseText, rpCommand, self, self.hostPlugin)
 				
 		
