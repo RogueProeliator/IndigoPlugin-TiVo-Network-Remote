@@ -81,6 +81,7 @@
 #		Updated init routine to lower logging level of requests library
 #	Version 21 [September 2016]
 #		Changed to new Python based logging for Indigo 7
+#		Changed flag for including UPnP on the menu to be passed in to constructor
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -165,12 +166,14 @@ class RPFrameworkPlugin(indigo.PluginBase):
 	# Constructor called once upon plugin class creation; setup the basic functionality
 	# common to all plugins based on the framework
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs, daysBetweenUpdateChecks=1, managedDeviceClassModule=None):
-		super(RPFrameworkPlugin, self).__init__(pluginId, pluginDisplayName, pluginVersion, pluginPrefs)
-		
+	def __init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs, daysBetweenUpdateChecks=1, managedDeviceClassModule=None, pluginSupportsUPNP=False):
 		# flag the plugin as undergoing initialization so that we know the full
 		# indigo plugin is not yet available
 		self.pluginIsInitializing = True
+		self.pluginSupportsUPNPDebug = pluginSupportsUPNP
+		
+		# call the base class' initialization to begin setup...
+		indigo.PluginBase.__init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs)
 				
 		# setup a custom logging format to make it easier to look through (this applies only to the plugin's
 		# individual file handler
@@ -234,11 +237,8 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		# if it is present
 		self.parseRPFrameworkConfig(pluginDisplayName.replace(u' Plugin', u''))
 		
-		# indigo base class's init method; note that this will reset the debug setting to the
-		# "static" default of False, so we must reset it after the call
-		indigo.PluginBase.__init__(self, pluginId, pluginDisplayName, pluginVersion, pluginPrefs)
+		# initialization is complete...
 		self.pluginIsInitializing = False
-		self.debug = pluginPrefs.get(u'showDebugInfo', False)
 	
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -480,7 +480,8 @@ class RPFrameworkPlugin(indigo.PluginBase):
 											</Field>
 										</ConfigUI>
 									</MenuItem>"""
-			if self.getGUIConfigValue(GUI_CONFIG_PLUGINSETTINGS, GUI_CONFIG_PLUGIN_DEBUG_SHOWUPNPOPTION, u'False') == u'True':
+			
+			if self.pluginSupportsUPNPDebug == True:
 				debugMenuOptions += u"""<MenuItem id="debugUPNPDevicesFound">
 											<Name>Perform UPnP Search</Name>
 											<CallbackMethod>logUPnPDevicesFound</CallbackMethod>
@@ -546,13 +547,13 @@ class RPFrameworkPlugin(indigo.PluginBase):
 											</ConfigUI>
 										</MenuItem>"""
 			fileXml = fileXml.replace(u'</MenuItems>', updateCheckOptions + u'</MenuItems>')
-		
+
 		elif filename.endswith("Events.xml"):
 			# ****************** EVENTS ******************
+			self.logger.threaddebug(u'Customizing Events.xml')
 			pluginUpdateEvent = u'<Event id="pluginUpdateAvailable"><Name>Plugin Update Available</Name></Event>'
 			fileXml = fileXml.replace(u'[UPDATENOTIFICATION]', pluginUpdateEvent)
 			
-		self.logger.warning(fileXml)
 		return fileXml
 	
 	
@@ -919,12 +920,16 @@ class RPFrameworkPlugin(indigo.PluginBase):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def closedPrefsConfigUi(self, valuesDict, userCancelled):
 		if not userCancelled:
-			self.debug = valuesDict.get(u'showDebugInfo', False)
 			try:
 				self.debugLevel = int(valuesDict.get(u'debugLevel', DEBUGLEVEL_NONE))
 			except:
 				self.debugLevel = DEBUGLEVEL_NONE
+			
 			self.logger.debug(u'Plugin preferences updated')
+			if self.debugLevel == DEBUGLEVEL_NONE:
+				self.logger.info(u'Debugging disabled')
+			else:
+				self.logger.info(u'Debugging enabled... remember to turn off when done!')
 			
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine is called in order to get the initial values for the menu actions
@@ -1154,10 +1159,12 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		if self.debugLevel == DEBUGLEVEL_NONE:
 			self.debugLevel = DEBUGLEVEL_LOW
 			self.indigo_log_handler.setLevel(logging.DEBUG)
+			self.pluginPrefs["debugLevel"] = DEBUGLEVEL_LOW
 			self.logger.info(u'Debug enabled (on Low) by user')
 		else:
 			self.debugLevel = DEBUGLEVEL_NONE
 			self.indigo_log_handler.setLevel(logging.INFO)
+			self.pluginPrefs["debugLevel"] = DEBUGLEVEL_NONE
 			self.logger.info(u'Debug disabled by user')
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -1232,9 +1239,9 @@ class RPFrameworkPlugin(indigo.PluginBase):
 			return (False, valuesDict, errorsDict)
 		else:
 			for deviceId in devicesToDump:
-				indigo.server.log(u'Dumping details for DeviceID: ' + RPFrameworkUtils.to_unicode(deviceId))
+				self.logger.info(u'Dumping details for DeviceID: ' + RPFrameworkUtils.to_unicode(deviceId))
 				dumpDev = indigo.devices[int(deviceId)]
-				indigo.server.log(unicode(dumpDev))
+				self.logger.info(unicode(dumpDev))
 			return (True, valuesDict, errorsDict)
 		
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

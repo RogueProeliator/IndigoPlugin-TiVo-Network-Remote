@@ -139,7 +139,7 @@ class RPFrameworkDevice(object):
 	def terminateCommunications(self):
 		self.hostPlugin.logger.debug(u'Initiating shutdown of communications with ' + RPFrameworkUtils.to_unicode(self.indigoDevice.name))
 		if not (self.concurrentThread is None) and self.concurrentThread.isAlive() == True:
-			self.concurrentThread.terminate()
+			self.concurrentThread.terminateThread()
 			self.concurrentThread.join()
 		self.concurrentThread = None
 		self.hostPlugin.logger.debug(u'Shutdown of communications with ' + RPFrameworkUtils.to_unicode(self.indigoDevice.name) + u' complete')

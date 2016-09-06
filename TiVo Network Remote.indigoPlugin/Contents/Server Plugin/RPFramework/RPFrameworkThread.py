@@ -32,9 +32,9 @@ import threading
 def _async_raise(tid, exctype):
 	if not inspect.isclass(exctype):
 		raise TypeError(u'Only types can be raised (not instances)')
-	res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
+	res = ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(tid), ctypes.py_object(exctype))
 	if res == 0:
-		raise ValueError(u'invalid thread id')
+		raise ValueError(u'Invalid thread ID')
 	elif res != 1:
 		# if it returns a number greater than one, you're in trouble, 
 		# and you should call it again with exc=NULL to revert the effect
@@ -84,5 +84,5 @@ class RPFrameworkThread(threading.Thread):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine may be called in order to terminate the thread
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def terminate(self):
+	def terminateThread(self):
 		self.raise_exc(SystemExit)
