@@ -924,6 +924,14 @@ class RPFrameworkPlugin(indigo.PluginBase):
 				self.debugLevel = int(valuesDict.get(u'debugLevel', DEBUGLEVEL_NONE))
 			except:
 				self.debugLevel = DEBUGLEVEL_NONE
+				
+			# setup the logging level of the INDIGO logging handler to the selected level
+			if self.debugLevel == DEBUGLEVEL_LOW:
+				self.indigo_log_handler.setLevel(logging.DEBUG)
+			elif self.debugLevel == DEBUGLEVEL_HIGH:
+				self.indigo_log_handler.setLevel(logging.THREADDEBUG)
+			else:
+				self.indigo_log_handler.setLevel(logging.INFO)
 			
 			self.logger.debug(u'Plugin preferences updated')
 			if self.debugLevel == DEBUGLEVEL_NONE:
