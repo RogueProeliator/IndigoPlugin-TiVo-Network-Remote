@@ -312,8 +312,7 @@ class RPFrameworkTelnetDevice(RPFrameworkDevice.RPFrameworkDevice):
 			self.scheduleReconnectionAttempt()
 		except:
 			self.indigoDevice.setErrorStateOnServer(u'Error')
-			self.hostPlugin.logger.error(u'Error during background processing')
-			self.hostPlugin.logger.exception()
+			self.hostPlugin.logger.exception(u'Error during background processing')
 		finally:			
 			# update the device's connection state to no longer connected...
 			self.hostPlugin.logger.debug(u'Closing connection to device')

@@ -825,70 +825,76 @@ class RPFrameworkPlugin(indigo.PluginBase):
 	def checkVersionNow(self):
 		self.logger.debug(u'Version check initiated')
 		
-		# save the last check time (now) in the plugin's config and our class variable
-		timeNow = time.time()
-		self.pluginPrefs[u'updaterLastCheck'] = timeNow
-		self.nextUpdateCheck = timeNow + self.secondsBetweenUpdateChecks
+		try:
+			# save the last check time (now) in the plugin's config and our class variable
+			timeNow = time.time()
+			self.pluginPrefs[u'updaterLastCheck'] = timeNow
+			self.nextUpdateCheck = timeNow + self.secondsBetweenUpdateChecks
 
-		# use the updater to check for an update now
-		updateAvailable = self.updateChecker.checkForUpdate()
+			# use the updater to check for an update now
+			updateAvailable = self.updateChecker.checkForUpdate()
 		
-		if updateAvailable:
-			# execute any defined Updates triggers
-			if TRIGGER_UPDATEAVAILABLE_TYPEID in self.indigoEvents:
-				for trigger in self.indigoEvents[TRIGGER_UPDATEAVAILABLE_TYPEID].values():
-					indigo.trigger.execute(trigger)
+			if updateAvailable:
+				# execute any defined Updates triggers
+				if TRIGGER_UPDATEAVAILABLE_TYPEID in self.indigoEvents:
+					for trigger in self.indigoEvents[TRIGGER_UPDATEAVAILABLE_TYPEID].values():
+						indigo.trigger.execute(trigger)
 					
-			# TODO: Re-enable plugin update email!
-			# if execution made it this far then an update is available and we need to send
-			# the user an update email, if so configured
-			emailAddress = self.pluginPrefs.get(u'updaterEmail', u'')
-			if len(emailAddress) == 0:
-				self.logger.debug(u'No email address for updates found in the config')
+				# TODO: Re-enable plugin update email!
+				# if execution made it this far then an update is available and we need to send
+				# the user an update email, if so configured
+				emailAddress = self.pluginPrefs.get(u'updaterEmail', u'')
+				if len(emailAddress) == 0:
+					self.logger.debug(u'No email address for updates found in the config')
 
-			# if there's a checkbox in the config in addition to the email address text box
-			# then let the checkbox decide if we should send emails or not
-			if self.pluginPrefs.get(u'updaterEmailsEnabled', True) is False:
-				emailAddress = u''
+				# if there's a checkbox in the config in addition to the email address text box
+				# then let the checkbox decide if we should send emails or not
+				if self.pluginPrefs.get(u'updaterEmailsEnabled', True) is False:
+					emailAddress = u''
 
-			# if we do not have an email address, or emailing is disabled, then exit
-			if len(emailAddress) == 0:
-				return True
+				# if we do not have an email address, or emailing is disabled, then exit
+				if len(emailAddress) == 0:
+					return True
 
-			# get last version Emailed to the user
-			lastVersionEmailed = self.pluginPrefs.get(u'updaterLastVersionEmailed', '0')
+				# get last version Emailed to the user
+				lastVersionEmailed = self.pluginPrefs.get(u'updaterLastVersionEmailed', '0')
 
-			# if we already notified the user of this version then bail so that we don'time
-			# duplicate the notification
-			if lastVersionEmailed == self.updateChecker.latestReleaseFound:
-				self.logger.threaddebug(u'Version notification already emailed to the user about this version')
-				return True
+				# if we already notified the user of this version then bail so that we don'time
+				# duplicate the notification
+				if lastVersionEmailed == self.updateChecker.latestReleaseFound:
+					self.logger.threaddebug(u'Version notification already emailed to the user about this version')
+					return True
 
-			# build the email subject and body for sending to the user
-			try:
-				gitHubConfig = ConfigParser.RawConfigParser()
-				gitHubConfig.read('UpdaterConfig.cfg')
-				repositoryName = gitHubConfig.get('repository', 'name')
-				emailSubject = gitHubConfig.get('update-email', 'subject')				
-				versionHistory = requests.get('https://raw.githubusercontent.com/RogueProeliator/' + repositoryName + '/master/VERSION_HISTORY.txt')
+				# build the email subject and body for sending to the user
+				try:
+					gitHubConfig = ConfigParser.RawConfigParser()
+					gitHubConfig.read('UpdaterConfig.cfg')
+					repositoryName = gitHubConfig.get('repository', 'name')
+					emailSubject = gitHubConfig.get('update-email', 'subject')				
+					versionHistory = requests.get('https://raw.githubusercontent.com/RogueProeliator/' + repositoryName + '/master/VERSION_HISTORY.txt')
 
-				# Save this version as the last one emailed in the prefs
-				self.pluginPrefs[u'updaterLastVersionEmailed'] = self.updateChecker.latestReleaseFound
+					# Save this version as the last one emailed in the prefs
+					self.pluginPrefs[u'updaterLastVersionEmailed'] = self.updateChecker.latestReleaseFound
 
-				indigo.server.sendEmailTo(emailAddress, subject=emailSubject, body=versionHistory.text)
-			except:
-				self.logger.warning(u'Updater Error: Error sending update notification.')
-				if self.debugLevel > DEBUGLEVEL_NONE:
-					self.logger.exception()
+					indigo.server.sendEmailTo(emailAddress, subject=emailSubject, body=versionHistory.text)
+				except:
+					if self.debugLevel > DEBUGLEVEL_NONE:
+						self.logger.exception(u'Updater Error: Error sending update notification.')
+					else:
+						self.logger.warning(u'Updater Error: Error sending update notification.')
 				
-			# return true in order to indicate to any caller that an update
-			# was found/processed
-			return True
+				# return true in order to indicate to any caller that an update
+				# was found/processed
+				return True
 			
-		else:
-			# no update was available...
-			return False
-	
+			else:
+				# no update was available...
+				return False
+		except:
+			if self.debugLevel > DEBUGLEVEL_NONE:
+				self.logger.exception(u'Error checking for new plugin version.')
+			else:
+				self.logger.warning(u'Error checking for new plugin version.')
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Data Validation functions... these functions allow the plugin or devices to validate
