@@ -234,3 +234,16 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 				break
 			block += add
 		return block
+		
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine may be used by plugins to perform any upgrades specific to the plugin;
+	# it will be called following the framework's update processing
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def performPluginUpgrade(self, oldVersion, newVersion):
+		if oldVersion == u'':
+			pluginBasePath = os.getcwd()
+			jsonFilePath = os.path.join(pluginBasePath, "json.py")
+			if os.path.exists(jsonFilePath):
+				os.remove(jsonFilePath)
+				self.logger.debug(u'Removed obsolete json.py file')
+		

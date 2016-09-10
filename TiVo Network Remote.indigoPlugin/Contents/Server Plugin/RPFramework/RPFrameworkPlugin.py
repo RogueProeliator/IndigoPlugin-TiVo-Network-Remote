@@ -100,6 +100,7 @@ import RPFrameworkIndigoParam
 import RPFrameworkNetworkingUPnP
 from dataAccess import indigosql
 import Queue
+import shutil
 import socket
 from subprocess import call
 import time
@@ -236,6 +237,12 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		# parse the RPFramework plugin configuration XML provided for this plugin,
 		# if it is present
 		self.parseRPFrameworkConfig(pluginDisplayName.replace(u' Plugin', u''))
+		
+		# perform any upgrade steps if the plugin is running for the first time after
+		# an upgrade
+		oldPluginVersion = pluginPrefs.get(u'loadedPluginVersion', u'')
+		if oldPluginVersion != unicode(pluginVersion):
+			self.performPluginUpgradeMaintenance(oldPluginVersion, unicode(pluginVersion))
 		
 		# initialization is complete...
 		self.pluginIsInitializing = False
@@ -553,7 +560,13 @@ class RPFrameworkPlugin(indigo.PluginBase):
 			self.logger.threaddebug(u'Customizing Events.xml')
 			pluginUpdateEvent = u'<Event id="pluginUpdateAvailable"><Name>Plugin Update Available</Name></Event>'
 			fileXml = fileXml.replace(u'[UPDATENOTIFICATION]', pluginUpdateEvent)
-			
+		
+		elif filename.endswith("PluginConfig.xml"):
+			# ****************** PLUGIN CONFIG ******************
+			self.logger.threaddebug(u'Customizing PluginConfig.xml')
+			versionNumberSetting = u'<Field id="loadedPluginVersion type="textfield" hidden="true"><Label /></Field>'
+			fileXml = fileXml.replace(u'</PluginConfig>', versionNumberSetting + u'</PluginConfig>')
+		
 		return fileXml
 	
 	
@@ -895,6 +908,44 @@ class RPFrameworkPlugin(indigo.PluginBase):
 				self.logger.exception(u'Error checking for new plugin version.')
 			else:
 				self.logger.warning(u'Error checking for new plugin version.')
+			
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine is called whenever the plugin is updating from an older version, as
+	# determined by the plugin property and plugin version number
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def performPluginUpgradeMaintenance(self, oldVersion, newVersion):
+		if oldVersion == u'':
+			self.logger.info(u'Performing first upgrade/run of version ' + newVersion)
+		else:
+			self.logger.info(u'Performing upgrade from ' + oldVersion + ' to ' + newVersion)
+			
+		# execute the version-specific tasks
+		if oldVersion == u'':
+			# this is the first run of the plugin or the first run of the Indigo 7
+			# version... remove unused Requests module if it is present
+			pluginBasePath = os.getcwd()
+			rpFrameworkRequestsPath = os.path.join(pluginBasePath, "RPFramework/requests")
+			if os.path.isdir(rpFrameworkRequestsPath):
+				try:
+					self.logger.debug(u'Removing unused directory tree at ' + rpFrameworkRequestsPath)
+					shutil.rmtree(rpFrameworkRequestsPath)
+				except:
+					self.logger.exception(u'Failed to remove legacy "requests" from RPFramework directory')
+					
+		# allow the descendant classes to perform their own upgrade options
+		self.performPluginUpgrade(oldVersion, newVersion)
+		
+		# update the version flag within our plugin
+		self.pluginPrefs['loadedPluginVersion'] = newVersion
+		self.logger.debug(u'Completed plugin updating/installation for ' + newVersion)
+		
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine may be used by plugins to perform any upgrades specific to the plugin;
+	# it will be called following the framework's update processing
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def performPluginUpgrade(self, oldVersion, newVersion):
+		pass
+				
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Data Validation functions... these functions allow the plugin or devices to validate
