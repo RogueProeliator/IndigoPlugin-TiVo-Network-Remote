@@ -564,7 +564,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		elif filename.endswith("PluginConfig.xml"):
 			# ****************** PLUGIN CONFIG ******************
 			self.logger.threaddebug(u'Customizing PluginConfig.xml')
-			versionNumberSetting = u'<Field id="loadedPluginVersion type="textfield" hidden="true"><Label /></Field>'
+			versionNumberSetting = u'<Field id="loadedPluginVersion" type="textfield" hidden="true"><Label /></Field>'
 			fileXml = fileXml.replace(u'</PluginConfig>', versionNumberSetting + u'</PluginConfig>')
 		
 		return fileXml

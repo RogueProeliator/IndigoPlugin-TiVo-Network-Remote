@@ -246,4 +246,9 @@ class Plugin(RPFramework.RPFrameworkPlugin.RPFrameworkPlugin):
 			if os.path.exists(jsonFilePath):
 				os.remove(jsonFilePath)
 				self.logger.debug(u'Removed obsolete json.py file')
+				
+			jsonCompiledFilePath = os.path.join(pluginBasePath, "json.pyc")
+			if os.path.exists(jsonCompiledFilePath):
+				os.remove(jsonCompiledFilePath)
+				self.logger.debug(u'Removed obsolete json.pyc file')
 		
