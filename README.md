@@ -1,9 +1,9 @@
 #Introduction
-This Indigo 6.0+ plugin allows Indigo to act as a remote control for a network-connected TiVo Digital Video Recorder. Virtually every command/button found on the standard remote can be sent to TiVo as well as several additional commands not found on the TiVo-branded remote.
+This Indigo 6.1+ plugin allows Indigo to act as a remote control for a network-connected TiVo Digital Video Recorder. Virtually every command/button found on the standard remote can be sent to TiVo as well as several additional commands not found on the TiVo-branded remote.
 
 The only limitation of this TiVo-provided interface is that connected applications are simply acting as a remote and get little feedback, limited primarily to the current channel (as shown on Live TV).
 
-_**INDIGO 6 IMPORTANT NOTE:**_ The Indigo 6 version of this plugin is end-of-life with respect to new development, however the latest stable version on Indigo 6 is still available on the releases page and is working as expected at the moment. Please consider an upgrade to Indigo 7 to support further development of our favorite HA platform!
+_**INDIGO 6 IMPORTANT NOTE:**_ The Indigo 6 version of this plugin is end-of-life with respect to new development, however the latest stable version on Indigo 6 is [still available](https://github.com/RogueProeliator/IndigoPlugin-TiVo-Network-Remote/releases/tag/v1.4.19) and is working as expected at the moment. Please consider an upgrade to Indigo 7 to support further development of our favorite HA platform!
 
 #Hardware Requirements
 This plugin should work with any network-connected TiVo which supports the TiVo TCP Control Protocol; generally speaking this means any Series 3 or Premier (or newer) DVR which is running at least v9.4 of the TiVo software. This plugin has been successfully tested with:
