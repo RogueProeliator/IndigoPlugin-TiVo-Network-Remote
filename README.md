@@ -8,8 +8,8 @@ _**INDIGO 6 IMPORTANT NOTE:**_ The Indigo 6 version of this plugin is end-of-lif
 #Hardware Requirements
 This plugin should work with any network-connected TiVo which supports the TiVo TCP Control Protocol; generally speaking this means any Series 3 or Premier (or newer) DVR which is running at least v9.4 of the TiVo software. This plugin has been successfully tested with:
 
--TiVo Series 3
--TiVo Premier
+- TiVo Series 3
+- TiVo Premier
 
 The auto-discovery feature requires that the TiVo and Indigo be on the same subnet, though manual IP entry should allow remote control via a WAN interfaces (such as over a VPN connection). You may also want to consider setting a static IP address on the TiVo to help ensure a stable connection (see below).
 

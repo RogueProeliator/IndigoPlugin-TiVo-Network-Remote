@@ -186,7 +186,7 @@ class RPFrameworkDeviceResponse(object):
 					rpPlugin.logger.debug(u'Effect execution: Calling function ' + effect.updateParam)
 					eval(u'rpDevice.' + effect.updateParam + u'(responseObj, rpCommand)')
 			except:
-				rpPlugin.logger.error(u'Error executing effect for device id ' + RPFrameworkUtils.to_unicode(rpDevice.indigoDevice.id))
+				rpPlugin.logger.exception(u'Error executing effect for device id ' + RPFrameworkUtils.to_unicode(rpDevice.indigoDevice.id))
 				
 	
 #/////////////////////////////////////////////////////////////////////////////////////////
