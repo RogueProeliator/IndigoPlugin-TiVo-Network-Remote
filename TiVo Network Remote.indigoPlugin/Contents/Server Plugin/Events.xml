@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
 <Events>
-[UPDATENOTIFICATION]
+	<Event id="pluginUpdateAvailable">
+		<Name>Plugin Update Available</Name>
+	</Event>
 </Events>

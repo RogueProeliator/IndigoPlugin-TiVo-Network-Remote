@@ -25,5 +25,61 @@
 		</ConfigUI>
 	</MenuItem>
 	<MenuItem id="deviceCmdsSeparator" type="separator" />
-	[DEBUGOPTIONS]
+	<MenuItem id="toggleDebug">
+		<Name>Toggle Debugging On/Off</Name>
+		<CallbackMethod>toggleDebugEnabled</CallbackMethod>
+	</MenuItem>
+	<MenuItem id="debugDumpDeviceDetails">
+		<Name>Log Device Details</Name>
+		<CallbackMethod>dumpDeviceDetailsToLog</CallbackMethod>
+		<ButtonTitle>Output</ButtonTitle>
+		<ConfigUI>
+			<Field id="dumpDeviceDetailsToLog_Title" type="label" fontColor="darkGray">
+				<Label>DEVICE DETAILS DEBUG</Label>
+			</Field>
+			<Field id="dumpDeviceDetailsToLog_TitleSeparator" type="separator" />
+			<Field type="label" id="dumpDeviceDetailsToLogInstructions" fontSize="small">
+				<Label>This function will dump the details of a plugin device to the Indigo Event Log to aid in debugging and forum posts.</Label>
+			</Field>
+			<Field id="devicesToDump" type="list">
+				<Label>Devices to Log:</Label>
+				<List class="indigo.devices" filter="self" />
+			</Field>
+		</ConfigUI>
+	</MenuItem>
+	<MenuItem id="updateSectionSeparator" />
+	<MenuItem id="checkForUpdateImmediate">
+		<Name>Check for Updates</Name>
+		<ConfigUI>
+			<Field id="versionCheckTitle" type="label" fontColor="darkGray">
+				<Label>PLUGIN UPDATE CHECK</Label>
+			</Field>
+			<Field id="versionCheckTitleSeparator" type="separator" />
+			<Field id="currentVersion" type="textfield" readonly="true">
+				<Label>Current Version:</Label>
+			</Field>
+			<Field id="latestVersion" type="textfield" readonly="true">
+				<Label>Latest Available:</Label>
+			</Field>
+			<Field id="versionCheckResults" type="textfield" hidden="true">
+				<Label></Label>
+			</Field>
+			<Field id="versionCheckUpdateAvailableMsg" type="label" alignWithControl="true" fontColor="blue" visibleBindingId="versionCheckResults" visibleBindingValue="1">
+				<Label>A new version of the plugin is available for download. Please visit the forums for information.</Label>
+			</Field>
+			<Field id="versionCheckLaunchHelpUrl" type="button" visibleBindingId="versionCheckResults" visibleBindingValue="1">
+				<Title>Download Update</Title>
+				<CallbackMethod>initiateUpdateDownload</CallbackMethod>
+			</Field>
+			<Field id="versionCheckUpdateCurrentMsg" type="label" alignWithControl="true" fontColor="black" visibleBindingId="versionCheckResults" visibleBindingValue="2">
+				<Label>Your plugin is currently up-to-date; thanks for checking!</Label>
+			</Field>
+			<Field id="versionCheckUpdateErrorMsg" type="label" alignWithControl="true" fontColor="red" visibleBindingId="versionCheckResults" visibleBindingValue="3">
+				<Label>An error was encountered while checking your plugin version. Please try again later.</Label>
+			</Field>
+			<Field id="updateInProgressMsg" type="label" alignWithControl="true" fontColor="blue" visibleBindingId="versionCheckResults" visibleBindingValue="4">
+				<Label>Your download has been initiated; you will get the standard Indigo dialog confirming the plugin update on the server once it is ready.</Label>
+			</Field>
+		</ConfigUI>
+	</MenuItem>
 </MenuItems>
