@@ -87,6 +87,10 @@
 					<Option value="MINUS">-</Option>
 					<Option value="EQUALS">=</Option>
 					<Option value="COMMA">,</Option>
+                                        <Option value="ACTION_D">SkipMode</Option>
+                                        <Option value="ACTION_A">ACTION_A</Option>
+                                        <Option value="ACTION_B">ACTION_B</Option>
+                                        <Option value="ACTION_C">ACTION_C</Option>
 				</List>
 			</Field>
 		</ConfigUI>
