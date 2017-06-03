@@ -19,6 +19,10 @@
 					<Option value="NUM8">8</Option>
 					<Option value="NUM9">9</Option>
 					<Option value="ADVANCE">Advance</Option>
+					<Option value="ACTION_A">Shortcut A</Option>
+					<Option value="ACTION_B">Shortcut B</Option>
+					<Option value="ACTION_C">Shortcut C</Option>
+					<Option value="ACTION_D">Shortcut D</Option>
 					<Option value="ASPECT_CORRECTION_FULL">Aspect Correction: Full</Option>
 					<Option value="ASPECT_CORRECTION_PANEL">Aspect Correction: Panel</Option>
 					<Option value="ASPECT_CORRECTION_ZOOM">Aspect Correction: Zoom</Option>

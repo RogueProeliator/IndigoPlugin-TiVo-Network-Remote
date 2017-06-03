@@ -82,6 +82,8 @@
 #	Version 21 [September 2016]
 #		Changed to new Python based logging for Indigo 7
 #		Changed flag for including UPnP on the menu to be passed in to constructor
+#	Version 22 [October 2016]
+#		Removed XML file customization which was not working post-Beta 7
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -449,125 +451,6 @@ class RPFrameworkPlugin(indigo.PluginBase):
 			rpParam.invalidValueMessage = RPFrameworkUtils.to_unicode(invalidMessageNode.text)
 	
 		return rpParam
-		
-		
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Indigo Plugin Setup Overrides
-	#/////////////////////////////////////////////////////////////////////////////////////
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# this routine is used by the base plugin to get the XML from a configuration file; we
-	# need to intercept this call and do substitutions when appropriate
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def _getXmlFromFile(self, filename):
-		fileXml = RPFrameworkUtils.to_unicode(super(RPFrameworkPlugin, self)._getXmlFromFile(filename))
-		
-		# we need to setup our standard menu items dynamically
-		if filename.endswith("MenuItems.xml"):
-			# ****************** MENU ITEMS ******************
-			self.logger.threaddebug(u'Customizing MenuItems.xml')
-			
-			# build the debug menu section... this will always include the debug toggle but
-			# may include additional commands based upon type
-			debugMenuOptions = u'<MenuItem id="toggleDebug"><Name>Toggle Debugging On/Off</Name><CallbackMethod>toggleDebugEnabled</CallbackMethod></MenuItem>'
-			debugMenuOptions += u"""<MenuItem id="debugDumpDeviceDetails">
-										<Name>Log Device Details</Name>
-										<CallbackMethod>dumpDeviceDetailsToLog</CallbackMethod>
-										<ButtonTitle>Output</ButtonTitle>
-										<ConfigUI>
-											<Field id="dumpDeviceDetailsToLog_Title" type="label" fontColor="darkGray">
-												<Label>DEVICE DETAILS DEBUG</Label>
-											</Field>
-											<Field id="dumpDeviceDetailsToLog_TitleSeparator" type="separator" />
-											<Field type="label" id="dumpDeviceDetailsToLogInstructions" fontSize="small">
-												<Label>This function will dump the details of a plugin device to the Indigo Event Log to aid in debugging and forum posts.</Label>
-											</Field>
-											<Field id="devicesToDump" type="list">
-												<Label>Devices to Log:</Label>
-												<List class="indigo.devices" filter="self" />
-											</Field>
-										</ConfigUI>
-									</MenuItem>"""
-			
-			if self.pluginSupportsUPNPDebug == True:
-				debugMenuOptions += u"""<MenuItem id="debugUPNPDevicesFound">
-											<Name>Perform UPnP Search</Name>
-											<CallbackMethod>logUPnPDevicesFound</CallbackMethod>
-											<ButtonTitle>Search</ButtonTitle>
-											<ConfigUI>
-												<Field id="logUPnPDevices_Title" type="label" fontColor="darkGray">
-													<Label>UPnP DEVICE SEARCH</Label>
-												</Field>
-												<Field id="logUPnPDevices_TitleSeparator" type="separator" />
-												<Field type="label" id="logUPnPDevicesInstructions" fontSize="small">
-													<Label>This function will perform a UPnP search in an attempt to find devices available on the network and display those in your browser. This may help in debugging devices found or not found on the network during device setup and configuration</Label>
-												</Field>
-												<Field id="logUPnPDevices_service" type="menu" defaultValue="0">
-													<Label>Find Devices/Services:</Label>
-													<List>
-														<Option value="0">Find All</Option>
-													</List>
-												</Field>
-												<Field id="logUPnPDevices_Warning" type="label" fontSize="small" alignWithControl="true">
-													<Label>Note that some devices will only respond once in a set amount of time; you may want to wait a few minutes and try again if your are missing a device(s).</Label>
-												</Field>
-												<Field type="label" id="logUPnPDevicesTimeWarning" fontColor="blue">
-													<Label>NOTE: This function may take up to 30 seconds to complete upon hitting the Run Debug button; your results will be launched in a browser window on the server.</Label>
-												</Field>
-											</ConfigUI>
-										</MenuItem>"""	
-			fileXml = fileXml.replace(u'[DEBUGOPTIONS]', debugMenuOptions)
-			
-			# always include the update check section...
-			updateCheckOptions = 	u"""<MenuItem id="updateSectionSeparator" />
-										<MenuItem id="checkForUpdateImmediate">
-											<Name>Check for Updates</Name>
-											<ConfigUI>
-												<Field id="versionCheckTitle" type="label" fontColor="darkGray">
-													<Label>PLUGIN UPDATE CHECK</Label>
-												</Field>
-												<Field id="versionCheckTitleSeparator" type="separator" />
-												<Field id="currentVersion" type="textfield" readonly="true">
-													<Label>Current Version:</Label>
-												</Field>
-												<Field id="latestVersion" type="textfield" readonly="true">
-													<Label>Latest Available:</Label>
-												</Field>
-												<Field id="versionCheckResults" type="textfield" hidden="true">
-													<Label></Label>
-												</Field>
-												<Field id="versionCheckUpdateAvailableMsg" type="label" alignWithControl="true" fontColor="blue" visibleBindingId="versionCheckResults" visibleBindingValue="1">
-													<Label>A new version of the plugin is available for download. Please visit the forums for information.</Label>
-												</Field>
-												<Field id="versionCheckLaunchHelpUrl" type="button" visibleBindingId="versionCheckResults" visibleBindingValue="1">
-													<Title>Download Update</Title>
-													<CallbackMethod>initiateUpdateDownload</CallbackMethod>
-												</Field>
-												<Field id="versionCheckUpdateCurrentMsg" type="label" alignWithControl="true" fontColor="black" visibleBindingId="versionCheckResults" visibleBindingValue="2">
-													<Label>Your plugin is currently up-to-date; thanks for checking!</Label>
-												</Field>
-												<Field id="versionCheckUpdateErrorMsg" type="label" alignWithControl="true" fontColor="red" visibleBindingId="versionCheckResults" visibleBindingValue="3">
-													<Label>An error was encountered while checking your plugin version. Please try again later.</Label>
-												</Field>
-												<Field id="updateInProgressMsg" type="label" alignWithControl="true" fontColor="blue" visibleBindingId="versionCheckResults" visibleBindingValue="4">
-													<Label>Your download has been initiated; you will get the standard Indigo dialog confirming the plugin update on the server once it is ready.</Label>
-												</Field>
-											</ConfigUI>
-										</MenuItem>"""
-			fileXml = fileXml.replace(u'</MenuItems>', updateCheckOptions + u'</MenuItems>')
-
-		elif filename.endswith("Events.xml"):
-			# ****************** EVENTS ******************
-			self.logger.threaddebug(u'Customizing Events.xml')
-			pluginUpdateEvent = u'<Event id="pluginUpdateAvailable"><Name>Plugin Update Available</Name></Event>'
-			fileXml = fileXml.replace(u'[UPDATENOTIFICATION]', pluginUpdateEvent)
-		
-		elif filename.endswith("PluginConfig.xml"):
-			# ****************** PLUGIN CONFIG ******************
-			self.logger.threaddebug(u'Customizing PluginConfig.xml')
-			versionNumberSetting = u'<Field id="loadedPluginVersion" type="textfield" hidden="true"><Label /></Field>'
-			fileXml = fileXml.replace(u'</PluginConfig>', versionNumberSetting + u'</PluginConfig>')
-		
-		return fileXml
 	
 	
 	#/////////////////////////////////////////////////////////////////////////////////////

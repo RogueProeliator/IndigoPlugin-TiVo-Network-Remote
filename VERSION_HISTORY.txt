@@ -6,6 +6,9 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
+Version 2.1.0 [June 2017]:
+* Added the four action shortcut options to the IR Command menu (thanks to forum user @NewfD90 for that)
+
 Version 2.0.4 [November 2016]:
 * Updated to full Indigo 7 support; Indigo 7 is now required for v2.0.0+
 
