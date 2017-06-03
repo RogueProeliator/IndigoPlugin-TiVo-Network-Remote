@@ -18,6 +18,7 @@
 					</param>
 				</params>
 				<guiConfiguration>
+					<deviceIsChildDevice>False</deviceIsChildDevice>
 					<deviceUPNPDeviceFieldId>tivoEnumeratedIPAddresses</deviceUPNPDeviceFieldId>
 					<deviceUPNPDeviceSelectedFieldId>tivoIPAddress</deviceUPNPDeviceSelectedFieldId>
 					<deviceAddressFormat><![CDATA[%ap:tivoIPAddress%]]></deviceAddressFormat>
