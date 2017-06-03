@@ -11,6 +11,8 @@ This plugin should work with any network-connected TiVo which supports the TiVo 
 - TiVo Series 3
 - TiVo Premier
 - TiVo Mini
+- TiVo Bolt
+- TiVo Roamio
 
 The auto-discovery feature requires that the TiVo and Indigo be on the same subnet, though manual IP entry should allow remote control via a WAN interfaces (such as over a VPN connection). You may also want to consider setting a static IP address on the TiVo to help ensure a stable connection (see below).
 
