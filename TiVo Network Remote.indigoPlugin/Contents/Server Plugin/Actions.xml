@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Actions>
 
-	<Action id="irCommandToTivo" deviceFilter="self">
+	<Action id="irCommandToTivo" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Send network-based IR command to TiVo</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
@@ -99,7 +99,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="teleportCommandToTivo" deviceFilter="self">
+	<Action id="teleportCommandToTivo" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Send network-based teleport command to TiVo</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
@@ -114,7 +114,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="tuneCommandToTiVo" deviceFilter="self">
+	<Action id="tuneCommandToTiVo" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Change channel on TiVo</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
@@ -127,8 +127,8 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="sep01" />
-	<Action id="addDigitToChannelSelector" deviceFilter="self">
+	<Action id="sep01" uiPath="DeviceActions" />
+	<Action id="addDigitToChannelSelector" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Add a digit to the channel selector</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
@@ -153,7 +153,7 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="tuneToChannelSelectorChannel" deviceFilter="self">
+	<Action id="tuneToChannelSelectorChannel" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Tune to the channel selector's channel</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
@@ -163,11 +163,11 @@
 			</Field>
 		</ConfigUI>
 	</Action>
-	<Action id="removeDigitFromChannelSelector" deviceFilter="self">
+	<Action id="removeDigitFromChannelSelector" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Remove the last digit from channel selector</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
-	<Action id="clearChannelSelector" deviceFilter="self">
+	<Action id="clearChannelSelector" uiPath="DeviceActions" deviceFilter="self">
 		<Name>Clear the channel selector</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 	</Action>
