@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <MenuItems>
 	<MenuItem id="sendNonDocumentedCommand">
-		<Name>Send Arbitrary Command</Name>
+		<Name>Send Arbitrary Command...</Name>
 		<CallbackMethod>sendArbitraryCommand</CallbackMethod>
 		<ButtonTitle>Send</ButtonTitle>
 		<ConfigUI>
@@ -30,7 +30,7 @@
 		<CallbackMethod>toggleDebugEnabled</CallbackMethod>
 	</MenuItem>
 	<MenuItem id="debugDumpDeviceDetails">
-		<Name>Log Device Details</Name>
+		<Name>Log Device Details...</Name>
 		<CallbackMethod>dumpDeviceDetailsToLog</CallbackMethod>
 		<ButtonTitle>Output</ButtonTitle>
 		<ConfigUI>
@@ -49,7 +49,7 @@
 	</MenuItem>
 	<MenuItem id="updateSectionSeparator" />
 	<MenuItem id="checkForUpdateImmediate">
-		<Name>Check for Updates</Name>
+		<Name>Check for Updates...</Name>
 		<ConfigUI>
 			<Field id="versionCheckTitle" type="label" fontColor="darkGray">
 				<Label>PLUGIN UPDATE CHECK</Label>

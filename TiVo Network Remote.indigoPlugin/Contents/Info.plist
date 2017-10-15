@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>PluginVersion</key>
-	<string>2.1.0</string>
+	<string>2.1.1</string>
 	<key>ServerApiVersion</key>
 	<string>2.0.0</string>
 	<key>IwsApiVersion</key>
 	<string>1.0.0</string>
 	<key>CFBundleDisplayName</key>
-	<string>TiVo Network Remote Plugin</string>
+	<string>TiVo Network Remote</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.duncanware.tivoNetworkRemote</string>
 	<key>CFBundleVersion</key>

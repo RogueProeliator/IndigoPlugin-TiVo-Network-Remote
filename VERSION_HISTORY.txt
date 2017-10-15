@@ -6,6 +6,9 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
+Version 2.1.1 [October 2017]:
+* Small UI standardizations and fixes
+
 Version 2.1.0 [June 2017]:
 * Added the four action shortcut options to the IR Command menu (thanks to forum user @NewfD90 for that)
 
