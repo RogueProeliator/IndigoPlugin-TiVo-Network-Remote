@@ -38,4 +38,5 @@
 			<Option value="2">High</Option>
 		</List>
 	</Field>
+	<Field id="loadedPluginVersion" type="textfield" hidden="true"><Label /></Field>
 </PluginConfig>
