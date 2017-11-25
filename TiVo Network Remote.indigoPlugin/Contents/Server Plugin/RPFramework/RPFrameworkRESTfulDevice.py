@@ -73,6 +73,7 @@ import urllib2
 from urlparse import urlparse
 
 import requests
+from requests.auth import HTTPDigestAuth
 import RPFrameworkPlugin
 import RPFrameworkCommand
 import RPFrameworkDevice
@@ -244,7 +245,11 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 								password = commandPayloadList[4]
 							if authenticationType != 'none' and username != u'':
 								self.hostPlugin.logger.threaddebug(u'Using login credentials... Username=> ' + username + u'; Password=>' + RPFrameworkUtils.to_unicode(len(password)) + u' characters long')
-								authenticationParam = (username, password)
+								if authenticationType.lower() == 'digest':
+									self.hostPlugin.logger.threaddebug(u'Enabling digest authentication')
+									authenticationParam = HTTPDigestAuth(username, password)
+								else:
+									authenticationParam = (username, password)
 							
 							# execute the URL fetching depending upon the method requested
 							if command.commandName == CMD_RESTFUL_GET or command.commandName == CMD_DOWNLOADFILE or command.commandName == CMD_DOWNLOADIMAGE:
@@ -447,11 +452,11 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-		
 	def handleRESTfulError(self, rpCommand, err, response=None):
 		if rpCommand.commandName == CMD_RESTFUL_PUT or rpCommand.commandName == CMD_RESTFUL_GET:
-			self.hostPlugin.logger.error(u'An error occurred executing the GET/PUT request (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
+			self.hostPlugin.logger.exception(u'An error occurred executing the GET/PUT request (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
 		else:
-			self.hostPlugin.logger.error(u'An error occurred processing the SOAP/JSON POST request: (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
+			self.hostPlugin.logger.exception(u'An error occurred processing the SOAP/JSON POST request: (Device: ' + RPFrameworkUtils.to_unicode(self.indigoDevice.id) + u'): ' + RPFrameworkUtils.to_unicode(err))
 			
-		if not response is None:
+		if not response is None and not response.text is None:
 			self.hostPlugin.logger.debug(RPFrameworkUtils.to_unicode(response.text))
 			
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

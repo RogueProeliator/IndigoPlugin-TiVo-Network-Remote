@@ -5,12 +5,8 @@
 		<CallbackMethod>sendArbitraryCommand</CallbackMethod>
 		<ButtonTitle>Send</ButtonTitle>
 		<ConfigUI>
-			<Field id="sendArbitraryCommandTitle" type="label" fontColor="darkGray">
-				<Label>SEND ARBITRARY COMMAND</Label>
-			</Field>
-			<Field id="titleSeparator" type="separator" />
 			<Field type="label" id="commandSendInstructions" fontSize="small">
-				<Label>This allows sending an arbitrary command to the TiVo box for use in debugging control codes. The code will be sent just as if from the other actions, but with any value typed here.</Label>
+				<Label>Allows sending an arbitrary command to the TiVo box for use in debugging control codes. The code will be sent just as if from the other actions, but with any value typed here.</Label>
 			</Field>
 			<Field id="targetDevice" type="menu">
 				<Label>TiVo:</Label>
@@ -34,12 +30,8 @@
 		<CallbackMethod>dumpDeviceDetailsToLog</CallbackMethod>
 		<ButtonTitle>Output</ButtonTitle>
 		<ConfigUI>
-			<Field id="dumpDeviceDetailsToLog_Title" type="label" fontColor="darkGray">
-				<Label>DEVICE DETAILS DEBUG</Label>
-			</Field>
-			<Field id="dumpDeviceDetailsToLog_TitleSeparator" type="separator" />
 			<Field type="label" id="dumpDeviceDetailsToLogInstructions" fontSize="small">
-				<Label>This function will dump the details of a plugin device to the Indigo Event Log to aid in debugging and forum posts.</Label>
+				<Label>Outputs the details of a plugin device to the Indigo Event Log to aid in debugging and forum posts.</Label>
 			</Field>
 			<Field id="devicesToDump" type="list">
 				<Label>Devices to Log:</Label>
@@ -51,10 +43,6 @@
 	<MenuItem id="checkForUpdateImmediate">
 		<Name>Check for Updates...</Name>
 		<ConfigUI>
-			<Field id="versionCheckTitle" type="label" fontColor="darkGray">
-				<Label>PLUGIN UPDATE CHECK</Label>
-			</Field>
-			<Field id="versionCheckTitleSeparator" type="separator" />
 			<Field id="currentVersion" type="textfield" readonly="true">
 				<Label>Current Version:</Label>
 			</Field>

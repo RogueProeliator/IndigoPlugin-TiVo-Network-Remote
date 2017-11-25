@@ -23,7 +23,7 @@
 	<Field type="label" id="debugSpacer" fontSize="mini">
 		<Label></Label>
 	</Field>
-	<Field id="debugOptionsTitle" type="label" fontColor="darkGray" fontSize="small">
+	<Field id="debugOptionsTitle" type="label" fontColor="darkGray" fontSize="mini">
 		<Label>DEBUGGING OPTIONS</Label>
 	</Field>
 	<Field id="debugSeparator2" type="separator" />

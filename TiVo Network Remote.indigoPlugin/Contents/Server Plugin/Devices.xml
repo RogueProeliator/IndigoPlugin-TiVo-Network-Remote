@@ -27,7 +27,7 @@
 			<Field id="address" type="textfield" hidden='true' >
 				<Label/>
 			</Field>
-			<Field type="label" id="miscOptionsSpacer" fontSize="small">
+			<Field type="label" id="miscOptionsSpacer" fontSize="mini">
 				<Label></Label>
 			</Field>
 			<Field id="miscOptionsTitle" type="label" fontColor="darkGray" fontSize="small">
@@ -38,7 +38,8 @@
 				<Label>Media Access Key (MAK):</Label>
 			</Field>
 			<Field id="makInstructions" type="label" fontSize="small" alignWithControl="true">
-				<Label>The Media Access Key (MAK) is required to enable certain advanced features of the TiVo Network Remote, such as direct navigation to certain screens (such as Amazon, Netflix, etc.) For basic control this is not required. Please see the forum if you need help in obtaining your MAK.</Label>
+				<Label>The Media Access Key (MAK) is required to enable certain advanced features of the TiVo Network Remote, such as direct navigation to certain screens (such as Amazon, Netflix, etc.) For basic control this is not required. Please see the forum if you need help in obtaining your MAK.
+				</Label>
 			</Field>
 		</ConfigUI>
 		<UiDisplayStateId>connectionState</UiDisplayStateId>
