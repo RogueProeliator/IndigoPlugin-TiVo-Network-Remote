@@ -5,7 +5,7 @@
 	<Device type="custom" id="tivoRemoteDevice">
 		<Name>TiVo Network Remote Control</Name>
 		<ConfigUI>	
-			<Field id="commOptionsTitle" type="label" fontColor="darkGray">
+			<Field id="commOptionsTitle" type="label" fontColor="darkGray" fontSize="small">
 				<Label>NETWORK OPTIONS</Label>
 			</Field>
 			<Field id="instructionSeparator2" type="separator" />
@@ -30,7 +30,7 @@
 			<Field type="label" id="miscOptionsSpacer" fontSize="small">
 				<Label></Label>
 			</Field>
-			<Field id="miscOptionsTitle" type="label" fontColor="darkGray">
+			<Field id="miscOptionsTitle" type="label" fontColor="darkGray" fontSize="small">
 				<Label>MISC OPTIONS</Label>
 			</Field>
 			<Field id="miscSeparator2" type="separator" />

@@ -2,7 +2,7 @@
 <Actions>
 
 	<Action id="irCommandToTivo" uiPath="DeviceActions" deviceFilter="self">
-		<Name>Send network-based IR command to TiVo</Name>
+		<Name>Send IR command to TiVo</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
 			<Field type="menu" id="irCommandSelect">
@@ -91,16 +91,16 @@
 					<Option value="MINUS">-</Option>
 					<Option value="EQUALS">=</Option>
 					<Option value="COMMA">,</Option>
-                                        <Option value="ACTION_D">SkipMode</Option>
-                                        <Option value="ACTION_A">ACTION_A</Option>
-                                        <Option value="ACTION_B">ACTION_B</Option>
-                                        <Option value="ACTION_C">ACTION_C</Option>
+                    <Option value="ACTION_D">SkipMode</Option>
+                    <Option value="ACTION_A">ACTION_A</Option>
+                    <Option value="ACTION_B">ACTION_B</Option>
+                    <Option value="ACTION_C">ACTION_C</Option>
 				</List>
 			</Field>
 		</ConfigUI>
 	</Action>
 	<Action id="teleportCommandToTivo" uiPath="DeviceActions" deviceFilter="self">
-		<Name>Send network-based teleport command to TiVo</Name>
+		<Name>Send Teleport command to TiVo</Name>
 		<CallbackMethod>executeAction</CallbackMethod>
 		<ConfigUI>
 			<Field type="menu" id="teleportCommandSelect">
