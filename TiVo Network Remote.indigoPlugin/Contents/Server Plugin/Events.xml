@@ -1,6 +1,3 @@
 <?xml version="1.0"?>
 <Events>
-	<Event id="pluginUpdateAvailable">
-		<Name>Plugin Update Available</Name>
-	</Event>
 </Events>

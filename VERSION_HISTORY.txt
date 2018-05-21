@@ -6,8 +6,11 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
+Version 2.2.0 [May 2018]:
+* Removed the update notification check (this method was no longer supported by GitHub)
+
 Version 2.1.4 [November 2017]:
-Updated the plugin structure to as well as several UI elements. No significant functionality changes were added.
+* Updated the plugin structure to as well as several UI elements. No significant functionality changes were added.
 
 Version 2.1.1 [October 2017]:
 * Small UI standardizations and fixes

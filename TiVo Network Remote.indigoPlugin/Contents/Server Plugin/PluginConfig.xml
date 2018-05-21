@@ -7,22 +7,6 @@
         <Label>Developed by RogueProeliator</Label>
     </Field>
     <Field id="headerSpacer" type="label" fontSize="mini"/>
-	<Field id="commOptionsTitle" type="label" fontColor="darkGray" fontSize="small">
-		<Label>UPDATE NOTIFICATION OPTIONS</Label>
-	</Field>
-	<Field id="updateSectionSeparator2" type="separator" />
-	<Field type="label" id="updaterInstructions" fontSize="small">
-		<Label>This plugin may optionally email you to notify when updates are available; to do so, you must enable the notifications email, enter an email address and ensure that email sending is configured in Indigo's preferences.</Label>
-	</Field>
-	<Field id="updaterEmailsEnabled" type="checkbox" defaultValue="true">
-	   <Label>Email Update Notifications:</Label>
-	</Field>
-	<Field id="updaterEmail" type="textfield">
-	   <Label>Notifications Email:</Label>
-	</Field>
-	<Field type="label" id="debugSpacer" fontSize="mini">
-		<Label></Label>
-	</Field>
 	<Field id="debugOptionsTitle" type="label" fontColor="darkGray" fontSize="mini">
 		<Label>DEBUGGING OPTIONS</Label>
 	</Field>

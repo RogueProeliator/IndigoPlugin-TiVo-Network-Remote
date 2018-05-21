@@ -110,7 +110,6 @@ from urllib2 import urlopen
 import xml.etree.ElementTree
 import threading
 import RPFrameworkUtils
-from RPFrameworkUpdater import GitHubPluginUpdater
 import ConfigParser
 import logging
 
@@ -147,8 +146,6 @@ GUI_CONFIG_DATABASE_CONN_DBNAME = u'databaseConnectionDBName'
 DEBUGLEVEL_NONE = 0		# no .debug() logs will be shown in the Indigo log
 DEBUGLEVEL_LOW = 1		# show .debug() logs in the Indigo log
 DEBUGLEVEL_HIGH = 2		# show .ThreadDebug() log calls in the Indigo log
-
-TRIGGER_UPDATEAVAILABLE_TYPEID = u'pluginUpdateAvailable'
 
 
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -227,11 +224,6 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		
 		# create the command queue that will be used at the device level
 		self.pluginCommandQueue = Queue.Queue()
-		
-		# setup the plugin update checker... it will be disabled if the URL is empty
-		self.updateChecker = GitHubPluginUpdater(self)
-		self.secondsBetweenUpdateChecks = daysBetweenUpdateChecks * 86400
-		self.nextUpdateCheck = time.time()
 		
 		# create plugin-level configuration variables
 		self.pluginConfigParams = []
@@ -637,10 +629,6 @@ class RPFrameworkPlugin(indigo.PluginBase):
 					elif command.commandName == RPFrameworkCommand.CMD_DEBUG_LOGUPNPDEVICES:
 						# kick off the UPnP discovery and logging now
 						self.logUPnPDevicesFoundProcessing()
-						
-					elif command.commandName == RPFrameworkCommand.CMD_DOWNLOAD_UPDATE:
-						# process a request to download the latest version
-						self.updateChecker.update()
 					
 					else:
 						# allow a base class to process the command
@@ -651,11 +639,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 					self.pluginCommandQueue.task_done()
 					if reQueueCommand == True:
 						self.logger.threaddebug(u'Plugin command queue not yet ready; requeuing for future execution')
-						reQueueCommandsList.append(command)
-				
-				# arbitrary time to check to see if we need to check for updates...
-				# this shouldn't block unless it is time to check
-				self.pollForAvailableUpdate()	
+						reQueueCommandsList.append(command)	
 				
 				# any commands that did not yet execute should be placed back into the queue
 				for commandToRequeue in reQueueCommandsList:
@@ -695,139 +679,6 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		if not (deviceTypeId in self.deviceResponseDefinitions):
 			self.deviceResponseDefinitions[deviceTypeId] = list()
 		self.deviceResponseDefinitions[deviceTypeId].append(responseDfn)
-			
-		
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Plugin updater methods... used to check for a new version of the plugin from a URL
-	# based upon work by "berkinet" and "Travis" on the Indigo forums
-	#/////////////////////////////////////////////////////////////////////////////////////
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# this routine will poll for available updates, performing the check only if the next
-	# check time has elapsed; it is designed such that it may be called however often by
-	# the plugin or devices
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def pollForAvailableUpdate(self):
-		# obtain the current date/time and determine if it is after the previously-calculated
-		# next check run
-		timeNow = time.time()
-		if timeNow > self.nextUpdateCheck:
-			self.checkVersionNow()
-	
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# this routine will do the work of executing a check for a new version... it will do
-	# the request in a synchronous manner, so should be executed from a separate thread
-	# from the GUI thread
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def checkVersionNow(self):
-		self.logger.debug(u'Version check initiated')
-		
-		try:
-			# save the last check time (now) in the plugin's config and our class variable
-			timeNow = time.time()
-			self.pluginPrefs[u'updaterLastCheck'] = timeNow
-			self.nextUpdateCheck = timeNow + self.secondsBetweenUpdateChecks
-
-			# use the updater to check for an update now
-			updateAvailable = self.updateChecker.checkForUpdate()
-		
-			if updateAvailable:
-				# execute any defined Updates triggers
-				if TRIGGER_UPDATEAVAILABLE_TYPEID in self.indigoEvents:
-					for trigger in self.indigoEvents[TRIGGER_UPDATEAVAILABLE_TYPEID].values():
-						indigo.trigger.execute(trigger)
-					
-				# TODO: Re-enable plugin update email!
-				# if execution made it this far then an update is available and we need to send
-				# the user an update email, if so configured
-				emailAddress = self.pluginPrefs.get(u'updaterEmail', u'')
-				if len(emailAddress) == 0:
-					self.logger.debug(u'No email address for updates found in the config')
-
-				# if there's a checkbox in the config in addition to the email address text box
-				# then let the checkbox decide if we should send emails or not
-				if self.pluginPrefs.get(u'updaterEmailsEnabled', True) is False:
-					emailAddress = u''
-
-				# if we do not have an email address, or emailing is disabled, then exit
-				if len(emailAddress) == 0:
-					return True
-
-				# get last version Emailed to the user
-				lastVersionEmailed = self.pluginPrefs.get(u'updaterLastVersionEmailed', '0')
-
-				# if we already notified the user of this version then bail so that we don'time
-				# duplicate the notification
-				if lastVersionEmailed == self.updateChecker.latestReleaseFound:
-					self.logger.threaddebug(u'Version notification already emailed to the user about this version')
-					return True
-
-				# build the email subject and body for sending to the user
-				try:
-					gitHubConfig = ConfigParser.RawConfigParser()
-					gitHubConfig.read('UpdaterConfig.cfg')
-					repositoryName = gitHubConfig.get('repository', 'name')
-					emailSubject = gitHubConfig.get('update-email', 'subject')				
-					versionHistory = requests.get('https://raw.githubusercontent.com/RogueProeliator/' + repositoryName + '/master/VERSION_HISTORY.txt')
-
-					# Save this version as the last one emailed in the prefs
-					self.pluginPrefs[u'updaterLastVersionEmailed'] = self.updateChecker.latestReleaseFound
-
-					indigo.server.sendEmailTo(emailAddress, subject=emailSubject, body=versionHistory.text)
-				except:
-					if self.debugLevel > DEBUGLEVEL_NONE:
-						self.logger.exception(u'Updater Error: Error sending update notification.')
-					else:
-						self.logger.warning(u'Updater Error: Error sending update notification.')
-				
-				# return true in order to indicate to any caller that an update
-				# was found/processed
-				return True
-			
-			else:
-				# no update was available...
-				return False
-		except:
-			if self.debugLevel > DEBUGLEVEL_NONE:
-				self.logger.exception(u'Error checking for new plugin version.')
-			else:
-				self.logger.warning(u'Error checking for new plugin version.')
-			
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine is called whenever the plugin is updating from an older version, as
-	# determined by the plugin property and plugin version number
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def performPluginUpgradeMaintenance(self, oldVersion, newVersion):
-		if oldVersion == u'':
-			self.logger.info(u'Performing first upgrade/run of version ' + newVersion)
-		else:
-			self.logger.info(u'Performing upgrade from ' + oldVersion + ' to ' + newVersion)
-			
-		# execute the version-specific tasks
-		if oldVersion == u'':
-			# this is the first run of the plugin or the first run of the Indigo 7
-			# version... remove unused Requests module if it is present
-			pluginBasePath = os.getcwd()
-			rpFrameworkRequestsPath = os.path.join(pluginBasePath, "RPFramework/requests")
-			if os.path.isdir(rpFrameworkRequestsPath):
-				try:
-					self.logger.debug(u'Removing unused directory tree at ' + rpFrameworkRequestsPath)
-					shutil.rmtree(rpFrameworkRequestsPath)
-				except:
-					self.logger.exception(u'Failed to remove legacy "requests" from RPFramework directory')
-					
-		# allow the descendant classes to perform their own upgrade options
-		self.performPluginUpgrade(oldVersion, newVersion)
-		
-		# update the version flag within our plugin
-		self.pluginPrefs['loadedPluginVersion'] = newVersion
-		self.logger.debug(u'Completed plugin updating/installation for ' + newVersion)
-		
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine may be used by plugins to perform any upgrades specific to the plugin;
-	# it will be called following the framework's update processing
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def performPluginUpgrade(self, oldVersion, newVersion):
-		pass
 				
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -1051,16 +902,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 				
 		# if we make it here, the input should be valid
 		return True
-		
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine will kick off a download of the latest version of the plugin via the
-	# GitHub updater
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def initiateUpdateDownload(self, valuesDict, menuId):
-		self.pluginCommandQueue.put(RPFrameworkCommand.RPFrameworkCommand(RPFrameworkCommand.CMD_DOWNLOAD_UPDATE, commandPayload=None))
-		valuesDict[u'versionCheckResults'] = u'4'
-		return valuesDict
-		
+				
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will launch the help URL in a new browser window
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -1349,6 +1191,43 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		reportOutputFile.close()
 		
 		return reportFilename
+		
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine is called whenever the plugin is updating from an older version, as
+	# determined by the plugin property and plugin version number
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def performPluginUpgradeMaintenance(self, oldVersion, newVersion):
+		if oldVersion == u'':
+			self.logger.info(u'Performing first upgrade/run of version ' + newVersion)
+		else:
+			self.logger.info(u'Performing upgrade from ' + oldVersion + ' to ' + newVersion)
+			
+		# execute the version-specific tasks
+		if oldVersion == u'':
+			# this is the first run of the plugin or the first run of the Indigo 7
+			# version... remove unused Requests module if it is present
+			pluginBasePath = os.getcwd()
+			rpFrameworkRequestsPath = os.path.join(pluginBasePath, "RPFramework/requests")
+			if os.path.isdir(rpFrameworkRequestsPath):
+				try:
+					self.logger.debug(u'Removing unused directory tree at ' + rpFrameworkRequestsPath)
+					shutil.rmtree(rpFrameworkRequestsPath)
+				except:
+					self.logger.exception(u'Failed to remove legacy "requests" from RPFramework directory')
+					
+		# allow the descendant classes to perform their own upgrade options
+		self.performPluginUpgrade(oldVersion, newVersion)
+		
+		# update the version flag within our plugin
+		self.pluginPrefs['loadedPluginVersion'] = newVersion
+		self.logger.debug(u'Completed plugin updating/installation for ' + newVersion)
+		
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine may be used by plugins to perform any upgrades specific to the plugin;
+	# it will be called following the framework's update processing
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def performPluginUpgrade(self, oldVersion, newVersion):
+		pass
 		
 			
 	#/////////////////////////////////////////////////////////////////////////////////////

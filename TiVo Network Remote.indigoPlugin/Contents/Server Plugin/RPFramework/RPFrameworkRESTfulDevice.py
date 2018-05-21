@@ -229,6 +229,7 @@ class RPFrameworkRESTfulDevice(RPFrameworkDevice.RPFrameworkDevice):
 							# [5] => data to post as the body (if any, may be blank)
 							commandPayloadList = command.getPayloadAsList()
 							fullGetUrl = commandPayloadList[0] + u'://' + deviceHTTPAddress[0] + u':' + RPFrameworkUtils.to_unicode(deviceHTTPAddress[1]) + commandPayloadList[1]
+							self.hostPlugin.logger.threaddebug(u'Full URL for GET: ' + fullGetUrl)
 							
 							customHeaders = {}
 							self.addCustomHTTPHeaders(customHeaders)

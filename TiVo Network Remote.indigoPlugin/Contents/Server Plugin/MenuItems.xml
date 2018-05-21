@@ -57,34 +57,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			</Field>
 		</ConfigUI>
 	</MenuItem>
-	<MenuItem id="checkForUpdateImmediate">
-		<Name>Check for Updates...</Name>
-		<ConfigUI>
-			<Field id="currentVersion" type="textfield" readonly="true">
-				<Label>Current Version:</Label>
-			</Field>
-			<Field id="latestVersion" type="textfield" readonly="true">
-				<Label>Latest Available:</Label>
-			</Field>
-			<Field id="versionCheckResults" type="textfield" hidden="true">
-				<Label></Label>
-			</Field>
-			<Field id="versionCheckUpdateAvailableMsg" type="label" alignWithControl="true" fontColor="blue" visibleBindingId="versionCheckResults" visibleBindingValue="1">
-				<Label>A new version of the plugin is available for download. Please visit the forums for information.</Label>
-			</Field>
-			<Field id="versionCheckLaunchHelpUrl" type="button" visibleBindingId="versionCheckResults" visibleBindingValue="1">
-				<Title>Download Update</Title>
-				<CallbackMethod>initiateUpdateDownload</CallbackMethod>
-			</Field>
-			<Field id="versionCheckUpdateCurrentMsg" type="label" alignWithControl="true" fontColor="black" visibleBindingId="versionCheckResults" visibleBindingValue="2">
-				<Label>Your plugin is currently up-to-date; thanks for checking!</Label>
-			</Field>
-			<Field id="versionCheckUpdateErrorMsg" type="label" alignWithControl="true" fontColor="red" visibleBindingId="versionCheckResults" visibleBindingValue="3">
-				<Label>An error was encountered while checking your plugin version. Please try again later.</Label>
-			</Field>
-			<Field id="updateInProgressMsg" type="label" alignWithControl="true" fontColor="blue" visibleBindingId="versionCheckResults" visibleBindingValue="4">
-				<Label>Your download has been initiated; you will get the standard Indigo dialog confirming the plugin update on the server once it is ready.</Label>
-			</Field>
-		</ConfigUI>
-	</MenuItem>
 </MenuItems>
