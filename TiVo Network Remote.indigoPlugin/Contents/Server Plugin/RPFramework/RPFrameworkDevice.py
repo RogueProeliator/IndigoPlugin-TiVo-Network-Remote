@@ -257,4 +257,14 @@ class RPFrameworkDevice(object):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def reloadIndigoDevice(self):
 		self.indigoDevice = indigo.devices[self.indigoDevice.id]
+		
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# This routine will update both the device's state list and the server with the new
+	# device states
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def updateStatesForDevice(self, statesToUpdate):
+		for updateValue in statesToUpdate:
+			self.indigoDevice.states[updateValue["key"]] = updateValue["value"]
+		self.indigoDevice.updateStatesOnServer(statesToUpdate)
+	
 	

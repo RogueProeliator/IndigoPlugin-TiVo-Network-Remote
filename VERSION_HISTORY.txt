@@ -6,6 +6,9 @@ To update to the latest version of the application, please download the latest r
 =================================
 VERSION HISTORY
 =================================
+Version 2.2.1 [June 2019]:
+* Brings update check inline with latest Indigo norms
+
 Version 2.2.0 [May 2018]:
 * Removed the update notification check (this method was no longer supported by GitHub)
 

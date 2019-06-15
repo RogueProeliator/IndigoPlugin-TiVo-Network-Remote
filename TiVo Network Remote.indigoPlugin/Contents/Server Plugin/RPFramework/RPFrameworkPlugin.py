@@ -84,6 +84,10 @@
 #		Changed flag for including UPnP on the menu to be passed in to constructor
 #	Version 22 [October 2016]
 #		Removed XML file customization which was not working post-Beta 7
+#	Version 23 [October 2018]
+#		Added new version check against Plugin store
+#	Version 24 [February 2019]
+#		Modified version check to only execute against API 2.0 and below
 #
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +116,7 @@ import threading
 import RPFrameworkUtils
 import ConfigParser
 import logging
+from distutils.version import LooseVersion
 
 #/////////////////////////////////////////////////////////////////////////////////////////
 # Constants and configuration variables
@@ -147,6 +152,7 @@ DEBUGLEVEL_NONE = 0		# no .debug() logs will be shown in the Indigo log
 DEBUGLEVEL_LOW = 1		# show .debug() logs in the Indigo log
 DEBUGLEVEL_HIGH = 2		# show .ThreadDebug() log calls in the Indigo log
 
+TRIGGER_UPDATEAVAILABLE_TYPEID = u'pluginUpdateAvailable'
 
 #/////////////////////////////////////////////////////////////////////////////////////////
 #/////////////////////////////////////////////////////////////////////////////////////////
@@ -225,6 +231,16 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		# create the command queue that will be used at the device level
 		self.pluginCommandQueue = Queue.Queue()
 		
+		# setup the plugin update checker... it will be disabled if the URL is empty or the
+		# Indigo API is 2.1 or above as it will be built in... but it may be configured for
+		# and version
+		self.updateCheckPollEnabled = True
+		if float(indigo.server.apiVersion) > 2.05:
+			self.updateCheckPollEnabled = False
+		self.secondsBetweenUpdateChecks = 86400
+		self.nextUpdateCheck = time.time()
+		self.latestReleaseFound = ''
+		
 		# create plugin-level configuration variables
 		self.pluginConfigParams = []
 		
@@ -240,7 +256,6 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		
 		# initialization is complete...
 		self.pluginIsInitializing = False
-	
 	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# This routine will parse the RPFrameworkConfig.xml file that is present in the
@@ -445,6 +460,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		return rpParam
 	
 	
+	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Indigo control methods
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -453,19 +469,15 @@ class RPFrameworkPlugin(indigo.PluginBase):
 	# of Indigo server or the plugin or an update
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def startup(self):
-		# if the database is created, verify/create the tables now
-		dbConn = self.openDatabaseConnection()
-		if dbConn:
-			self.verifyAndCreateTables(dbConn)
-			self.closeDatabaseConnection(dbConn)
+		pass
 		
-	
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	# shutdown is called by Indigo whenever the entire plugin is being shut down from
 	# being disabled, during an update process or if the server is being shut down
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def shutdown(self):
-		self.closeDatabaseConnection
+		pass
+		
 		
 		
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -587,6 +599,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		return False
 		
 		
+	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Asynchronous processing routines
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -640,6 +653,10 @@ class RPFrameworkPlugin(indigo.PluginBase):
 					if reQueueCommand == True:
 						self.logger.threaddebug(u'Plugin command queue not yet ready; requeuing for future execution')
 						reQueueCommandsList.append(command)	
+						
+				# arbitrary time to check to see if we need to check for updates...
+				# this shouldn't block unless it is time to check
+				self.pollForAvailableUpdate()	
 				
 				# any commands that did not yet execute should be placed back into the queue
 				for commandToRequeue in reQueueCommandsList:
@@ -661,7 +678,8 @@ class RPFrameworkPlugin(indigo.PluginBase):
 	def handleUnknownPluginCommand(self, rpCommand, reQueueCommandsList):
 		pass
 	
-		
+	
+	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Indigo definitions helper functions
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -679,7 +697,107 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		if not (deviceTypeId in self.deviceResponseDefinitions):
 			self.deviceResponseDefinitions[deviceTypeId] = list()
 		self.deviceResponseDefinitions[deviceTypeId].append(responseDfn)
+		
+		
+		
+	#/////////////////////////////////////////////////////////////////////////////////////
+	# Plugin updater methods... used to check for a new version of the plugin from a URL
+	# based upon work by "berkinet" and "Travis" on the Indigo forums
+	#/////////////////////////////////////////////////////////////////////////////////////
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# this routine will poll for available updates, performing the check only if the next
+	# check time has elapsed; it is designed such that it may be called however often by
+	# the plugin or devices
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def pollForAvailableUpdate(self):
+		# obtain the current date/time and determine if it is after the previously-calculated
+		# next check run
+		timeNow = time.time()
+		if self.updateCheckPollEnabled and timeNow > self.nextUpdateCheck:
+			self.checkVersionNow()
+			
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	# this routine will do the work of executing a check for a new version... it will do
+	# the request in a synchronous manner, so should be executed from a separate thread
+	# from the GUI thread
+	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+	def checkVersionNow(self):
+		self.logger.debug(u'Version check initiated')
+		try:
+			# save the last check time (now) in the plugin's config and our class variable
+			timeNow = time.time()
+			self.pluginPrefs[u'updaterLastCheck'] = timeNow
+			self.nextUpdateCheck = timeNow + self.secondsBetweenUpdateChecks
+ 			
+ 			current_version_url = "https://api.indigodomo.com/api/v2/pluginstore/plugin-version-info.json?pluginId={}".format(self.pluginId)
+			store_detail_url = "https://www.indigodomo.com/pluginstore/{}/"
+		
+			# GET the url from the servers with a short timeout (avoids hanging the plugin)
+			reply = requests.get(current_version_url, timeout=5)
+			
+			# This will raise an exception if the server returned an error
+			reply.raise_for_status()
+
+			# We now have a good reply so we get the json
+			reply_dict = reply.json()
+			plugin_dict = reply_dict["plugins"][0]
+
+			# Make sure that the 'latestRelease' element is a dict (could be a string for built-in plugins).
+			latest_release = plugin_dict["latestRelease"]
+			if isinstance(latest_release, dict):
+				# update the member variable (this is used for display purposes in dialogs)
+				self.latestReleaseFound = latest_release["number"]
+				self.logger.debug(u'Found version v{} versus current version v{}'.format(latest_release["number"], self.pluginVersion))				
+			
+				# Compare the current version with the one returned in the reply dict
+				if LooseVersion(latest_release["number"]) > LooseVersion(self.pluginVersion):			
+					# if execution made it this far then an update is available and we need to send
+					# the user an update email, if so configured
+					
+					# always alert to the indigo log
+					self.logger.info("A new version of the plugin (v{}) is available at: {}".format(latest_release["number"], store_detail_url.format(plugin_dict["id"])))
+					
+					emailAddress = self.pluginPrefs.get(u'updaterEmail', u'')
+					if len(emailAddress) == 0:
+						self.logger.debug(u'No email address for updates found in the config')
+						return True
+					else:
+ 						# if there's a checkbox in the config in addition to the email address text box
+						# then let the checkbox decide if we should send emails or not
+						if self.pluginPrefs.get(u'updaterEmailsEnabled', True) is False:
+							return True
+
+ 						# get last version Emailed to the user
+						lastVersionEmailed = self.pluginPrefs.get(u'updaterLastVersionEmailed', '0')
 				
+ 						# if we already notified the user of this version then bail so that we don'time
+						# duplicate the notification
+						if lastVersionEmailed == latest_release["number"]:
+							self.logger.threaddebug(u'Version notification already emailed to the user about this version')
+							return True
+					
+ 						# build the email subject and body for sending to the user
+						updateSubject = "Version {} of {} Indigo Plugin available".format(latest_release["number"], self.pluginDisplayName)
+						updateBody = "{} v{}\nReleased: {}\n{}\n\nTo update to the latest version of the application, please download the latest release available via the Indigo Plugin Store at {}.".format(
+								self.pluginDisplayName, latest_release["number"], latest_release["releaseDate"], plugin_dict["githubRepoUrl"], store_detail_url.format(plugin_dict["id"]))
+					
+ 						# Save this version as the last one emailed in the prefs
+						self.pluginPrefs[u'updaterLastVersionEmailed'] = latest_release["number"]
+ 						indigo.server.sendEmailTo(emailAddress, subject=updateSubject, body=updateBody)
+				
+					# return true in order to indicate to any caller that an update
+					# was found/processed
+					return True
+
+			# no update was available...
+			return False
+		except:
+			if self.debugLevel > DEBUGLEVEL_NONE:
+				self.logger.exception(u'Error checking for new plugin version.')
+			else:
+				self.logger.warning(u'Error checking for new plugin version.')
+				
+	
 	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Data Validation functions... these functions allow the plugin or devices to validate
@@ -745,10 +863,10 @@ class RPFrameworkPlugin(indigo.PluginBase):
 			# the dialog could get killed
 			updateAvailable = self.checkVersionNow()
 			valuesDict["currentVersion"] = RPFrameworkUtils.to_unicode(self.pluginVersion)
-			valuesDict["latestVersion"] = self.updateChecker.latestReleaseFound
+			valuesDict["latestVersion"] = self.latestReleaseFound
 			
 			# give the user a "better" message about the current status
-			if self.updateChecker.latestReleaseFound == u'':
+			if self.latestReleaseFound == u'':
 				valuesDict["versionCheckResults"] = u'3'
 			elif updateAvailable == True:
 				valuesDict["versionCheckResults"] = u'1'
@@ -911,6 +1029,7 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		self.browserOpen(supportUrl)
 		
 		
+	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Action execution routines... these allow automatic processing of actions that are
 	# known/managed/defined
@@ -1052,7 +1171,8 @@ class RPFrameworkPlugin(indigo.PluginBase):
 		
 		self.executeAction(None, indigoActionId, indigoDeviceId, paramValues)
 		
-		
+	
+	
 	#/////////////////////////////////////////////////////////////////////////////////////
 	# Helper routines
 	#/////////////////////////////////////////////////////////////////////////////////////
@@ -1228,69 +1348,4 @@ class RPFrameworkPlugin(indigo.PluginBase):
 	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 	def performPluginUpgrade(self, oldVersion, newVersion):
 		pass
-		
-			
-	#/////////////////////////////////////////////////////////////////////////////////////
-	# Database access/helper methods
-	#/////////////////////////////////////////////////////////////////////////////////////
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine opens/creates the database connection... note that a failure to connect
-	# will NOT crash the plugin!
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def openDatabaseConnection(self, guiConfigId=GUI_CONFIG_PLUGINSETTINGS):
-		dbConn = None
-		try:
-			# ensure that the database functionality has been enabled for the plugin
-			isDbEnabled = self.substituteIndigoValues(self.getGUIConfigValue(guiConfigId, GUI_CONFIG_DATABASE_CONN_ENABLED, u''), None, None)
-			self.logger.threaddebug(u'Database access enabled: ' + RPFrameworkUtils.to_unicode(isDbEnabled).lower())
-			if RPFrameworkUtils.to_unicode(isDbEnabled).lower() == 'true':
-				self.logger.threaddebug(u'Database access has been enabled, processing settings')
-			
-				# retrieve all of the possible settings required for the database
-				dbConnType = self.substituteIndigoValues(self.getGUIConfigValue(guiConfigId, GUI_CONFIG_DATABASE_CONN_TYPE, u'-1'), None, None)
-				dbConnDBName = self.substituteIndigoValues(self.getGUIConfigValue(guiConfigId, GUI_CONFIG_DATABASE_CONN_DBNAME, u''), None, None)
-				self.logger.threaddebug(u'Database settings: \nType: ' + dbConnType + u'\nName: ' + dbConnDBName)
-			
-				# determine if we can connect to the database with the given information
-				dbTypeInt = int(dbConnType)
-				if dbTypeInt == indigosql.kDbType_sqlite:
-					# only the name is required for a SQLLite database connection
-					if dbConnDBName == u'':
-						self.logger.error(u'A database path/name must be specified for a SQLLite database connection')
-					else:
-						# should be good to attempt a database connection...
-						debugLogFunc = None
-						if self.debugLevel > DEBUGLEVEL_NONE:
-							debugLogFunc = self.debugLog
-						dbConn = indigosql.IndigoSqlite(dbConnDBName, self.sleep, indigo.server.log, debugLogFunc)
-						self.logger.debug(u'SQLLite connection established')
-				else:
-					self.logger.error(u'Unsupported database type selected')
-					
-			else:
-				self.logger.threaddebug(u'Database access has been disabled, skipping connection')
-			
-			return dbConn
-		except:
-			self.logger.error(u'Error establishing database connection')
-			
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine will be called in order to create the tables for the plugin... each
-	# plugin should override this routine as needed
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def verifyAndCreateTables(self, dbConn):
-		pass
-			
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	# This routine will disconnect from the database, if it is currently connected
-	#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-	def closeDatabaseConnection(self, dbConn):
-		try:
-			if dbConn:
-				self.logger.debug(u'Closing database connection')
-				dbConn.CloseSqlConnection()
-				dbConn = None
-		except:
-			# do not re-raise the exception
-			pass
 		
